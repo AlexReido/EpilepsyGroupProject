@@ -25,7 +25,7 @@ imagesc(net)
  
 subplot 122
 plot(graph(net))
-
+ 
 
 
 % save([pwd '/', 'net_r_undir_10.mat'], 'net')
