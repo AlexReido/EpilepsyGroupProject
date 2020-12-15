@@ -1,6 +1,6 @@
 # import uvicorn
-import bct
 import numpy as np
+import bct
 # async def app(scope, receive, send):
 #     ...
 
@@ -11,6 +11,7 @@ if __name__ == "__main__":
     m = np.count_nonzero(model)/2
     distance = bct.distance_bin(model)
     print(distance)
+    # bct.
     synth = bct.generative_model(model, distance, m)
 
     print(synth)

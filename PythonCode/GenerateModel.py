@@ -3,6 +3,10 @@ from fastapi.encoders import jsonable_encoder
 import bct
 app = FastAPI()
 
+def getStructuralnetwork(k, m):
+    return  bct.makerandCIJ_und(k, m)
+
+
 
 @app.get("/")
 async def root():
