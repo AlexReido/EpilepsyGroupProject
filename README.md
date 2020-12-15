@@ -15,12 +15,15 @@ This service has two distinct methods to generate a network model; Generating a 
 
 Get /model/artificial/?constructionTechnique=Random&n=20
 
+Potentialy another service here: 
 Get /model/ieeg/?parameters
 
 ### Perform search /search/
-This service performs the search on the network model and returns the results in the form of a list of different sets of nodes with the ictogenicity reduction value
+This service performs the search on the network model and returns the results in the form 
+of a list of different sets of nodes with the ictogenicity reduction value.
 
-Get /search/?NodestobeExcluded=ACG&MaximumNumberOfNodes=20
+Pass the network model
+Get /search/?NodestobeExcluded=ACG&MaximumNumberOfNodes=20&AlgorithmUsed=NSGA
 
 ### Show results /results/
 This service returns the results in the format preferred
