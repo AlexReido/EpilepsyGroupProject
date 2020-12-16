@@ -13,7 +13,7 @@ I will now cover the API structure implemented by the backend
 ### Create model /model/
 This service has two distinct methods to generate a network model; Generating a model from an artificial network and generating a model from ieeg data. 
 
-Get /model/artificial/?constructionTechnique=Random&n=20
+Get /model/artificial/?type=Random&nodes=20&edges=100
 
 Potentialy another service here: 
 Get /model/ieeg/?parameters
