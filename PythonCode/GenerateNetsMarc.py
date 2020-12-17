@@ -2,13 +2,16 @@ import random as rand
 import numpy as np
 
 
-"""
-Determine if a graph is connected
+def is_graph_connected(adj):
+    """
+    Determine if a graph is connected
 
-:param adj: adjacency matrix
-:returns S: True if connected, False if not connected
-"""
-def isconnected_graph(adj):
+    :param adj: adjacency matrix
+    :returns S: True if connected, False if not connected
+    """
+
+    # TODO scipy function for this "connected_components"
+
     if np.count_nonzero(np.sum(adj, axis=0) == 0) != 0:
         return False
 
@@ -29,32 +32,33 @@ def isconnected_graph(adj):
         S = False
     return S
 
-"""
-:param n: The number of nodes the network should contain.
-:param c: The average degree of each node.
-:param gamma: Exponent.
-:returns net: The adjacency matrix of the network.
-"""
-def generate_sf_undir_network(n, c, gamma):
+
+def generate_sf_undirected_network(n, c, gamma):
+    """
+    :param n: The number of nodes the network should contain.
+    :param c: The average degree of each node.
+    :param gamma: Exponent.
+    :returns net: The adjacency matrix of the network.
+    """
     k = c / 2
 
     net = 0
     count = 0
-    while not isconnected_graph(net) and count < 1000:
+    while not is_graph_connected(net) and count < 1000:
         net = sf_und(n, k, gamma)
         count = count + 1
     return net
 
 
-"""
-This function generates an undirected scale-free network.
-
-:param n: number of nodes
-:param k: mean degree/2
-:param gamma: exponent, smaller the exponent, the more hetrogenous the network is
-:returns net: adjacency matrix
-"""
 def sf_und(n, k, gamma):
+    """
+    This function generates an undirected scale-free network.
+
+    :param n: number of nodes
+    :param k: mean degree/2
+    :param gamma: exponent, smaller the exponent, the more hetrogenous the network is
+    :returns net: adjacency matrix
+    """
     alpha = 1 / (gamma - 1)
     p = np.arange(1, n + 1, 1)
     p = p ** (-alpha)
