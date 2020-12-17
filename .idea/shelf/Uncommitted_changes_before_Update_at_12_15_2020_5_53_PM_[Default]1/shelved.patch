@@ -1,0 +1,66 @@
+Index: PythonCode/GenerateModel.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import FastAPI\r\nfrom fastapi.encoders import jsonable_encoder\r\nimport bct\r\napp = FastAPI()\r\n\r\n\r\n@app.get(\"/\")\r\nasync def root():\r\n    # weighted undirected network\r\n    model = bct.makerandCIJ_und(20, 100)\r\n    # functionalConnectivity = bct.p\r\n    print(type(model))\r\n    bct.generative_model()\r\n    return jsonable_encoder(model)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- PythonCode/GenerateModel.py	(revision 78dcebc72bda6fa5620ff0268c00fb5175b45c7c)
++++ PythonCode/GenerateModel.py	(date 1608052035927)
+@@ -3,6 +3,10 @@
+ import bct
+ app = FastAPI()
+ 
++def getStructuralnetwork(k, m):
++    return  bct.makerandCIJ_und(k, m)
++
++
+ 
+ @app.get("/")
+ async def root():
+Index: PythonCode/ServiceRunner.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># import uvicorn\r\nimport bct\r\nimport numpy as np\r\n# async def app(scope, receive, send):\r\n#     ...\r\n\r\nif __name__ == \"__main__\":\r\n    model = bct.makerandCIJ_und(20, 100)\r\n    # functionalConnectivity = bct.p\r\n    print(type(model))\r\n    m = np.count_nonzero(model)/2\r\n    distance = bct.distance_bin(model)\r\n    print(distance)\r\n    synth = bct.generative_model(model, distance, m)\r\n\r\n    print(synth)\r\n    # TODO add weights\r\n    # uvicorn.run(\"GenerateModel:app\", host=\"127.0.0.1\", port=5000, log_level=\"info\")
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- PythonCode/ServiceRunner.py	(revision 78dcebc72bda6fa5620ff0268c00fb5175b45c7c)
++++ PythonCode/ServiceRunner.py	(date 1608047360368)
+@@ -1,6 +1,6 @@
+ # import uvicorn
+-import bct
+ import numpy as np
++import bct
+ # async def app(scope, receive, send):
+ #     ...
+ 
+@@ -11,6 +11,7 @@
+     m = np.count_nonzero(model)/2
+     distance = bct.distance_bin(model)
+     print(distance)
++    # bct.
+     synth = bct.generative_model(model, distance, m)
+ 
+     print(synth)
+Index: PythonCode/Tests/TestArtificialNetwork.py
+===================================================================
+--- PythonCode/Tests/TestArtificialNetwork.py	(date 1608052473670)
++++ PythonCode/Tests/TestArtificialNetwork.py	(date 1608052473670)
+@@ -0,0 +1,16 @@
++import unittest
++import PythonCode.GenerateModel as gm
++import numpy as np
++
++
++class TestArtificailNetwork(unittest.TestCase):
++    def test_nodesandConnections(self):
++        k = 30
++        m = 100
++        # structural network
++        sn = gm.getStructuralnetwork(k,m)
++        self.assertEqual(len(sn), 30)
++        self.assertEqual(np.count_nonzero(sn == 1), 100)
++
++if __name__ == '__main__':
++    unittest.main()
