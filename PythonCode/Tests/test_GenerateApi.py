@@ -4,6 +4,7 @@ from multiprocessing import Process
 import asyncio
 import uvicorn
 import requests
+import time
 
 
 class TestGenerate(unittest.TestCase):
@@ -16,7 +17,7 @@ class TestGenerate(unittest.TestCase):
                                 "log_level": "info"},
                             daemon=True)
         self.proc.start()
-        asyncio.sleep(0.1)
+        time.sleep(4)
 
     def tearDown(self):
         self.proc.terminate()

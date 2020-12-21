@@ -21,16 +21,16 @@ if __name__ == "__main__":
     # print(synth)
     # TODO add weights
     #Get /model/artificial/?type=Random&nodes=20&edges=100
-    proc = Process(target=uvicorn.run,
-                        args=('GenerateModel:app',),
-                        kwargs={
-                            "host": "127.0.0.1",
-                            "port": 5000,
-                            "log_level": "info"},
-                        daemon=True)
-    proc.start()
-    asyncio.sleep(0.1)
-    # server = threading.Thread(target=uvicorn.run("GenerateModel:app", host="127.0.0.1", port=5000, log_level="info"))
-    # server.start()
+    # proc = Process(target=uvicorn.run,
+    #                     args=('GenerateModel:app',),
+    #                     kwargs={
+    #                         "host": "127.0.0.1",
+    #                         "port": 5000,
+    #                         "log_level": "info"},
+    #                     daemon=True)
+    # proc.start()
+    # asyncio.sleep(0.1)
+    server = threading.Thread(target=uvicorn.run("GenerateModel:app", host="127.0.0.1", port=5000, log_level="info"))
+    server.start()
 
 
