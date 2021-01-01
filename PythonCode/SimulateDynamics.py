@@ -27,7 +27,7 @@ def numba_compute_theta(t, wnet, nodes, seed=1337):
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
 
     # Compute time series
-    rand_i_sig = (i_sig * np.random.randn(t, nodes)).transpose()  # transpose to give same values as matlab
+    rand_i_sig = i_sig * np.random.randn(t, nodes).transpose()  # transpose to give same values as matlab
     theta = np.empty((t, nodes, 1))
     i_0 = np.full((nodes, 1), CONSTANTS.DIST)
     theta[0, :] = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
@@ -185,7 +185,7 @@ def bni_find(net, t=4000000, seed=1337):
         w_save[it - 1] = w
         bni_aux1 = np.mean(np.mean(np.squeeze(bni[:, :, it - 1]), keepdims=True, axis=0), keepdims=True, axis=1)
         bni_aux2 = np.mean(np.mean(np.squeeze(bni[:, :, :it]), keepdims=True, axis=0), axis=1, keepdims=True)
-        print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
+        #print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
             # Lucky guess:
@@ -249,7 +249,7 @@ def bni_find(net, t=4000000, seed=1337):
     return ref_coupling, bni_test_values, coupling_test_values
 
 
-def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337, rand_func=np.random.randn):
+def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     """
     delta_bni calculation for a specific network topology.
 
@@ -283,7 +283,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337, ran
 
     # Calculate delta_bni for different noise runs
     for noise in range(n_n):
-        delta_bni[0, noise] = (0.5 - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed, rand_func=rand_func)) / 0.5
+        delta_bni[0, noise] = (0.5 - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
 
     # Set value to the return value
     # Calculate the mean across the noise runs

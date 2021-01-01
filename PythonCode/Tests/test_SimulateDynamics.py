@@ -34,7 +34,7 @@ class TestSimulateDynamics(unittest.TestCase):
         bni = SD.theta_model_p(self.network, w, num_nodes_resected, t, seed=self.seed)
         # self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
         self.assertEqual(bni, 0.00014334745762711868)  # when using np.random.randn
-"""
+
     def test_bni_find(self):
         t = 4000 # would take too long if 4000000
         seed = 1337
@@ -48,7 +48,7 @@ class TestSimulateDynamics(unittest.TestCase):
         w_ref = SD.ref_bni(w, bni, ref)
         self.assertEqual(w_ref[0], 245.8085689794567)
 
-
+"""
     def test_delta_bni_r_dir(self):
         self.assertEqual(True, False)
 
