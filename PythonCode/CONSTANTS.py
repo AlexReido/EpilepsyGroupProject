@@ -1,0 +1,12 @@
+DT = 0.01  # time step for the integration
+NOISE = 5.0 * 1.2 * 0.1  # noise level
+DIST = -1.2  # distance to SNIC
+THRESHOLD = 0.9  # threshold for bni
+WINDOW_EPOCHS = 6 * 4 / DT  # window for bni
+ERR = 0.00001
+N_N = 5  # runs for noise
+N_MAX = 50  # max number of attempts
+CRITERIA = 0.05  # criteria for the tuning
+BNI_REF = 0.5  # reference of bni we are looking for
+DISPLACEMENT = 0.01  # displacement to help find bni_ref
+NUM_NODES_RESECTED = 0  # we do not resect nodes because at this stage we want bni of the whole network
