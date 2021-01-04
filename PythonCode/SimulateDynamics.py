@@ -90,8 +90,8 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
     bni = np.zeros((nodes, 1))
 
     #x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    #x = compute_theta(t, wnet, nodes)
-    x = numba_compute_theta(t, wnet, nodes, seed=seed)
+    #x = compute_theta(t, wnet, nodes)  # default vectorised python implementation
+    x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
 
     # Compute bni
     for node in range(nodes):
@@ -227,7 +227,7 @@ def bni_find(net, t=4000000, seed=1337):
             else:
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
-            # error in reference implementation?
+            #  TODO error in reference implementation? w above is redundant
             w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
 
         if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
@@ -248,21 +248,8 @@ def bni_find(net, t=4000000, seed=1337):
 
     return ref_coupling, bni_test_values, coupling_test_values
 
-
+"""
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
-    """
-    delta_bni calculation for a specific network topology.
-
-    :param rand_func:
-    :param seed:
-    :param t:
-    :param num_resect_nodes: The number of resected nodes.
-    :param individ: A binary array that corresponds to an individual (1 for secting the node, 0 for keeping the node)
-    :param w: The coupling value for which BNI=0.5.
-    :param net: Network topology
-
-    :returns delta_bni: delta_bni of the network for the specific resection as specified by the individ
-    """
 
     # Number of runs for the noise of SDEs
     n_n = 5
@@ -292,17 +279,6 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
 
 
 def fitness_function(x, w, net):
-    """
-    Multi-objective fitness function for the optimisation of the removal combination of an epileptic network.
-
-    :param x: Binary matrix with size (population size) x (network size). Each row corresponds to a different individual
-    and each column to a node of the network. 1 stands for removal and 0 for maintenance of the node.
-    :param w: Coupling value for which BNI=0.5
-    :param net: Network adjacency matrix
-    :returns y: A matrix with the fitness values. Its size is (population size) x 2. Each row corresponds to a different
-    individual and the two columns stand for the objective functions. The 1st column returns the sum of the resected
-    nodes and the 2nd column gives the 1-DBNI values.
-    """
     # count the number of individuals
     pop_size = len(x)
 
@@ -333,15 +309,7 @@ def fitness_function(x, w, net):
 
 
 def optimrun(generations, population, work_item, net, w):
-    """
-    Main function of the epileptic network optimisation method.
 
-    :param generations: NSGA-II generations number.
-    :param population: NSGA-II population size.
-    :param work_item: NSGA-II work_item name.
-    :param net: Network Topology.
-    :param w: The coupling value for which BNI = 0.5.
-    """
     # Network size in nodes
     nodes = len(net)
     rand.seed('shuffle')
@@ -361,7 +329,7 @@ def optimrun(generations, population, work_item, net, w):
     # ga_start = tic
 
     # Execute the NSGA-II
-
+"""
 
 """
 # set parameters
