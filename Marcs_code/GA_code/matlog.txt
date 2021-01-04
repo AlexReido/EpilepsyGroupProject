@@ -1,0 +1,115 @@
+[Warning: File 'states.mat' not found.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('optimrun', 'C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m', 51)" style="font-weight:bold">optimrun</a> (<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',51,0)">line 51</a>)] 
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',65,1)">65  </a>save('all_solutions.mat', 'all_solutions');
+x
+{Unrecognized function or variable 'x'.
+} 
+if system_dependent('IsDebugMode')==1, dbcont; end
+{'gaoptimset' requires <a href="matlab:matlab.internal.language.introspective.showAddon('GD', 'gaoptimset');">Global Optimization Toolbox</a>.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('optimrun', 'C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m', 75)" style="font-weight:bold">optimrun</a> (<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',75,0)">line 75</a>)
+optGA = gaoptimset(@gamultiobj);
+} 
+matlab.internal.language.introspective.showAddon('GD', 'gaoptimset');
+[Warning: File 'states.mat' not found.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('optimrun', 'C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m', 51)" style="font-weight:bold">optimrun</a> (<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',51,0)">line 51</a>)] 
+<a href="matlab: opentoline('C:\Program Files\MATLAB\R2020a\toolbox\matlab\lang\parallel_function.m',485,1)">485 </a>            consume(base, limit, F(base, limit));
+if system_dependent('IsDebugMode')==1, dbquit; end
+main_script
+    25
+
+    25
+
+    25
+
+    25
+
+    25
+
+Iteration: 1 | BNI = 0.00013736 | w = 25
+    50
+
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\randn2.m',7,1)">7   </a>end
+uiopen('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\outfun.m',1)
+if system_dependent('IsDebugMode')==1, dbquit; end
+theta_model_P(net,25,0)
+    25
+
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\theta_model_P.m',53,1)">53  </a>    x(time+1,:) = signal>threshold;
+if system_dependent('IsDebugMode')==1, dbquit; end
+theta_model_P(net,25,0)
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\randn2.m',7,1)">7   </a>end
+if system_dependent('IsDebugMode')==1, dbquit; end
+optimrun(1000, 200, 1, net, 0.288)
+Current path: C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code
+[Warning: File 'states.mat' not found.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('optimrun', 'C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m', 51)" style="font-weight:bold">optimrun</a> (<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',51,0)">line 51</a>)] 
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\fitnessfun.m',44,1)">44  </a>pop_size = size(x,1);
+x
+
+x =
+
+  Columns 1 through 9
+
+     1     0     1     0     0     1     0     0     1
+
+  Columns 10 through 18
+
+     0     0     1     1     1     0     0     0     0
+
+  Columns 19 through 27
+
+     0     0     1     0     0     1     0     1     1
+
+  Columns 28 through 36
+
+     0     0     0     0     1     0     1     0     0
+
+  Columns 37 through 45
+
+     0     1     0     0     1     0     1     0     1
+
+  Columns 46 through 54
+
+     0     0     1     0     1     1     0     1     0
+
+  Columns 55 through 59
+
+     1     0     1     0     1
+
+size(x)
+
+ans =
+
+     1    59
+
+@(x)fitnessfun(x,w,net)
+
+ans =
+
+  <a href="matlab:helpPopup function_handle" style="font-weight:bold">function_handle</a> with value:
+
+    @(x)fitnessfun(x,w,net)
+
+if system_dependent('IsDebugMode')==1, dbquit; end
+optimrun(1000, 200, 1, net, 0.288)
+Current path: C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code
+[Warning: File 'states.mat' not found.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('optimrun', 'C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m', 51)" style="font-weight:bold">optimrun</a> (<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',51,0)">line 51</a>)] 
+<a href="matlab: opentoline('C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\optimrun.m',65,1)">65  </a>save('all_solutions.mat', 'all_solutions');
+@(x)fitnessfun(x,w,net)
+
+ans =
+
+  <a href="matlab:helpPopup function_handle" style="font-weight:bold">function_handle</a> with value:
+
+    @(x)fitnessfun(x,w,net)
+
+x
+{Unrecognized function or variable 'x'.
+} 
+if system_dependent('IsDebugMode')==1, dbcont; end
+x
+{Unrecognized function or variable 'x'.
+} 
+if system_dependent('IsDebugMode')==1, dbquit; end

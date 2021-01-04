@@ -27,17 +27,25 @@ displac=0.01;        % displacement to help find BNI_ref
 num_nodes_resected = 0; %we do not resect modes because at this stage we want BNI of the whole network
 
 %% main calculations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%if exist('BNI_aux.mat','file')==0
+%    it=0;
+%    z=1;
+%    x1=0;
+%    x2=0;
+%    BNI=zeros(N,n_n,n_max);
+%    w_save=zeros(n_max,1);
+%else
+%    load('BNI_aux.mat');
+%end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if exist('BNI_aux.mat','file')==0
-    it=0;
-    z=1;
-    x1=0;
-    x2=0;
-    BNI=zeros(N,n_n,n_max);
-    w_save=zeros(n_max,1);
-else
-    load('BNI_aux.mat');
-end
+it=0;
+z=1;
+x1=0;
+x2=0;
+BNI=zeros(N,n_n,n_max);
+w_save=zeros(n_max,1);
 
 while(z)
     it=it+1;
@@ -95,13 +103,13 @@ while(z)
         else
             w=(BNI_ref-yy0)/slope;
         end
-        %w=(w_save(index(ind1))+w_save(index(ind2)))/2; 
+        w=(w_save(index(ind1))+w_save(index(ind2)))/2; 
 
     end    
     if (x1+x2==2 || it==n_max)
         z=0;
     end
-    %save('BNI_aux.mat','BNI','w_save','w','it','z','x1','x2','-v7.3');
+    save('BNI_aux.mat','BNI','w_save','w','it','z','x1','x2','-v7.3');
 end
 
 w_save(it+1:end)=[];
