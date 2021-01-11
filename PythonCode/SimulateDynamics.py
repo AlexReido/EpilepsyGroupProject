@@ -1,5 +1,8 @@
 import numpy as np
 import random as rand
+
+from scipy import io
+
 import compute_theta as ct
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
@@ -55,7 +58,7 @@ def compute_theta(t, wnet, nodes):
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
 
     # Compute time series
-    rand_i_sig = i_sig * np.random.randn(t, nodes).transpose()  # transpose to give same values as matlab
+    rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
     theta = np.empty((t, nodes, 1))
     i_0 = np.full((nodes, 1), CONSTANTS.DIST)
     theta[0, :] = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
@@ -248,29 +251,24 @@ def bni_find(net, t=4000000, seed=1337):
 
     return ref_coupling, bni_test_values, coupling_test_values
 
-"""
+
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
 
-    # Number of runs for the noise of SDEs
-    n_n = 5
-
     # Allocate delta_bni matrix: (1 x noise realiz)
-    delta_bni = np.ones((1, n_n))
+    delta_bni = np.ones((1, CONSTANTS.N_N))
 
     # Finds the position of the nodes that will be resected
     resected_position = np.where(individ)
 
-    # Remove lines for the resected nodes
-    # net[resected_position, :] = []
-    net = net[:resected_position, :] + net[resected_position + 1:, :]
+    # Remove rows for the resected nodes
+    net = np.delete(net, resected_position[0], axis=0)
 
     # Remove columns from the resected nodes
-    net[:, resected_position] = []
-    net = net[:, :resected_position] + net[:, resected_position + 1]
+    net = np.delete(net, resected_position[0], axis=1)
 
     # Calculate delta_bni for different noise runs
-    for noise in range(n_n):
-        delta_bni[0, noise] = (0.5 - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
+    for noise in range(CONSTANTS.N_N):
+        delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
 
     # Set value to the return value
     # Calculate the mean across the noise runs
@@ -278,12 +276,12 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     return delta_bni
 
 
-def fitness_function(x, w, net):
+def fitness_function(x, w, net, t=4000000, seed=1337):
     # count the number of individuals
     pop_size = len(x)
 
     # allocate a matrix for the output
-    y = np.ones(pop_size, 2)
+    y = np.ones((pop_size, 2))
 
     # allocate a matrix for the output
     y1 = np.ones(pop_size)
@@ -291,7 +289,7 @@ def fitness_function(x, w, net):
     # allocate a matrix for the output
     y2 = np.ones(pop_size)
 
-    # calculate the fitness for each individual
+    # Calculate the fitness for each individual
     for count_indiv in range(pop_size):
         individ = x[count_indiv, :]
 
@@ -300,7 +298,7 @@ def fitness_function(x, w, net):
 
         # 2nd objective function : DeltaBNI (We want to maximize DBNI, but
         # we put 1-DeltaBNI because the algorithm minimizes the objective functions)
-        y2[count_indiv] = 1 - delta_bni_r_dir(y1[count_indiv], individ, w, net)
+        y2[count_indiv] = 1 - delta_bni_r_dir(y1[count_indiv], individ, w, net, t, seed)
 
     # Set values to the return value
     y[:, 0] = y1
@@ -308,14 +306,22 @@ def fitness_function(x, w, net):
     return y
 
 
+class Solutions:
+
+    generations = 0
+
+    def __init__(self, name):
+        self.name = name
+
+
 def optimrun(generations, population, work_item, net, w):
 
     # Network size in nodes
     nodes = len(net)
-    rand.seed('shuffle')
+    np.random.seed('shuffle')
 
     # Create struct to save individuals of each generation
-    all_solutions = []
+    all_solutions = Solutions('all')
     # All solutions.target.ts = target_ts
     all_solutions.generations = 1
 
@@ -329,30 +335,20 @@ def optimrun(generations, population, work_item, net, w):
     # ga_start = tic
 
     # Execute the NSGA-II
-"""
 
-"""
-# set parameters
-num_gen = 100  # number of generations
-pop_size = 200  # population size in each generation
-num_GA_runs = 1  # number of GA runs
 
-# create the network
-n = 20
-c = 2
-gamma = 3
-network = generate_sf_undirected_network(n, c, gamma)
-print(network)
+def main_script():
 
-# first check if the network has ones in its main diagonal (if yes we delete them)
-length_net = len(network)
-if (np.diag(network) == np.ones((length_net, 1))).all:
-    network = network - np.eye(length_net)
+    network = io.loadmat('..\\resources\\net.mat')
 
-# compute the reference coupling value, for which BNI = 0.5
-ref_coupling, BNI_test_values, coupling_test_values = bni_find(network)
+    # first check if the network has ones in its main diagonal (if yes we delete them)
+    length_net = len(network)
+    if (np.diag(network) == np.ones((length_net, 1))).all:
+        network = network - np.eye(length_net)
 
-# apply the GA
-for count_runs in range(num_GA_runs):
-    optimrun(num_gen, pop_size, count_runs, network, ref_coupling)
-"""
+    # compute the reference coupling value, for which BNI = 0.5
+    ref_coupling, BNI_test_values, coupling_test_values = bni_find(network)
+
+    # apply the GA
+    for count_runs in range(CONSTANTS.num_GA_runs):
+        optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)

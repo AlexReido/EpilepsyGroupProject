@@ -16,7 +16,7 @@ function BNI=theta_model_P(net,w,nodes_resected)
 
 % Fixed parameters:
 T = 4*10^6;         % time steps
-%T = 4000
+%T = 4000;
 I_0 = -1.2;         % distance to SNIC
 I_sig = 5*1.2*0.1;  % noise level
 dt = 10^-2;         % time step for the integration
@@ -52,10 +52,6 @@ for time = 1:T-1
     x(time+1,:) = signal>threshold;
     theta_old = theta_new;
 end
-
-%
-sum(x(:)==1)
-
 
 % Compute BNI
 for node = 1:N
