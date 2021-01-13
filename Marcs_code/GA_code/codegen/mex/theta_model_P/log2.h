@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * _coder_theta_model_P_api.h
+ * log2.h
  *
- * Code generation for function '_coder_theta_model_P_api'
+ * Code generation for function 'log2'
  *
  */
 
@@ -23,7 +23,6 @@
 #include "theta_model_P_types.h"
 
 /* Function Declarations */
-void theta_model_P_api(const mxArray * const prhs[3], int32_T nlhs, const
-  mxArray *plhs[1]);
+void b_log2(real_T x, real_T *f, real_T *e);
 
-/* End of code generation (_coder_theta_model_P_api.h) */
+/* End of code generation (log2.h) */

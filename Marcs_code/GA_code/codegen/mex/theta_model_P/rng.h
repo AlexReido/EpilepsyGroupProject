@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * _coder_theta_model_P_api.h
+ * rng.h
  *
- * Code generation for function '_coder_theta_model_P_api'
+ * Code generation for function 'rng'
  *
  */
 
@@ -23,7 +23,7 @@
 #include "theta_model_P_types.h"
 
 /* Function Declarations */
-void theta_model_P_api(const mxArray * const prhs[3], int32_T nlhs, const
-  mxArray *plhs[1]);
+void rng_free(void);
+void rng_init(void);
 
-/* End of code generation (_coder_theta_model_P_api.h) */
+/* End of code generation (rng.h) */

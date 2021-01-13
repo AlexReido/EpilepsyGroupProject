@@ -1,21 +1,10 @@
 import unittest
-from math import sqrt
 from random import randint
 
 import numpy as np
 from scipy import io
-from scipy.special import erfinv
 import PythonCode.SimulateDynamics as SD
 from Tests import TEST_CONSTANTS
-
-
-def randn2(*args, **kwargs):
-    '''
-    Calls rand and applies inverse transform sampling to the output.
-    Used to generate exact same random numbers as the reference matlab implementation
-    '''
-    uniform = np.random.rand(*args, **kwargs)
-    return sqrt(2) * erfinv(2 * uniform - 1)
 
 
 def generate_fitness_matrix(population_size, nodes):
@@ -49,7 +38,8 @@ class TestSimulateDynamics(unittest.TestCase):
 
     def test_ref_bni(self):
         w = np.array([[25], [50], [100], [200], [225], [237.5], [250], [300]], dtype=object)
-        bni = np.array([[0], [0], [0], [0.012], [0.3228178], [0.48294068], [0.50860593], [0.62369492], [0.74772881]], dtype=object)
+        bni = np.array([[0], [0], [0], [0.012], [0.3228178], [0.48294068], [0.50860593], [0.62369492], [0.74772881]],
+                       dtype=object)
         ref = TEST_CONSTANTS.REFERENCE_BNI
         w_ref = SD.ref_bni(w, bni, ref)
         self.assertEqual(w_ref[0], TEST_CONSTANTS.W_REF)
@@ -60,7 +50,10 @@ class TestSimulateDynamics(unittest.TestCase):
         contents = io.loadmat('..\\resources\\x.mat')
         x = contents['r']
         y = SD.fitness_function(x, w, self.network, t, self.seed)
-        print(y)
+        self.assertEqual(len(y), len(self.network))
+        # TODO devise a better test
+        # possible accuracy error when comparing to matlab
+        self.assertEqual(True, False)  # deliberate failure to highlight lack of testing here
 
 
 """

@@ -41,7 +41,7 @@ x = false(T,N);
 theta_s = -real(acos((1+I_0)./(1-I_0))); % stable point if I_0 < 0
 theta_old = theta_s; % initial condition  
 
-rng(1337)
+%rng(1337)
 
 % Compute time series
 for time = 1:T-1

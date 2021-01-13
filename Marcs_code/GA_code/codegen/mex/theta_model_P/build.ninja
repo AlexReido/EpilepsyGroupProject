@@ -14,11 +14,11 @@ cxx = cl
 linker = link
 linkerxx = link
 
-cflags =  /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex  
+cflags =  /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex /openmp /wd4101 
 
-cxxflags =   /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex  
+cxxflags =   /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex /openmp /wd4101 
 
-ldflags =  /nologo /manifest   /DLL /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmx.lib libmex.lib libmat.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  /out:"theta_model_P_mex.mexw64" /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmwblas.lib libemlrt.lib libcovrt.lib libut.lib libmwmathutil.lib  /export:mexFunction /export:mexfilerequiredapiversion /export:emlrtMexFcnProperties /export:theta_model_P_initialize /export:theta_model_P_terminate /export:theta_model_P_atexit /export:theta_model_P /export:emxEnsureCapacity_real_T /export:emxEnsureCapacity_boolean_T /export:emxEnsureCapacity_int32_T /export:emxInit_real_T /export:emxFree_real_T /export:emxInit_boolean_T /export:emxFree_boolean_T /export:emxInit_int32_T /export:emxFree_int32_T
+ldflags =  /nologo /manifest   /DLL /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmx.lib libmex.lib libmat.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  /out:"theta_model_P_mex.mexw64" /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmwblas.lib libemlrt.lib libcovrt.lib libut.lib libmwmathutil.lib libiomp5md.lib /nodefaultlib:vcomp /LIBPATH:"$matlabdir\bin\win64" /export:mexFunction /export:mexfilerequiredapiversion /export:emlrtMexFcnProperties /export:theta_model_P_initialize /export:theta_model_P_terminate /export:theta_model_P_atexit /export:theta_model_P /export:emlrtGetRootTLSGlobal /export:emlrtLockerFunction /export:emxEnsureCapacity_real_T /export:emxEnsureCapacity_boolean_T /export:emxEnsureCapacity_int32_T /export:emxInit_real_T /export:emxFree_real_T /export:emxInit_boolean_T /export:emxFree_boolean_T /export:emxInit_int32_T /export:emxFree_int32_T
 
 # Build Rules
 rule cc
@@ -37,11 +37,18 @@ rule linkxx
 
 # Build
 build $builddir\rt_nonfinite.obj : cc $root\rt_nonfinite.c
+build $builddir\theta_model_P_mexutil.obj : cc $root\theta_model_P_mexutil.c
 build $builddir\theta_model_P_data.obj : cc $root\theta_model_P_data.c
 build $builddir\theta_model_P_initialize.obj : cc $root\theta_model_P_initialize.c
 build $builddir\theta_model_P_terminate.obj : cc $root\theta_model_P_terminate.c
 build $builddir\theta_model_P.obj : cc $root\theta_model_P.c
-build $builddir\randn.obj : cc $root\randn.c
+build $builddir\rand.obj : cc $root\rand.c
+build $builddir\eml_rand.obj : cc $root\eml_rand.c
+build $builddir\eml_rand_mcg16807_stateful.obj : cc $root\eml_rand_mcg16807_stateful.c
+build $builddir\eml_rand_shr3cong_stateful.obj : cc $root\eml_rand_shr3cong_stateful.c
+build $builddir\eml_rand_mt19937ar_stateful.obj : cc $root\eml_rand_mt19937ar_stateful.c
+build $builddir\applyScalarFunction.obj : cc $root\applyScalarFunction.c
+build $builddir\log2.obj : cc $root\log2.c
 build $builddir\mtimes.obj : cc $root\mtimes.c
 build $builddir\indexShapeCheck.obj : cc $root\indexShapeCheck.c
 build $builddir\nullAssignment.obj : cc $root\nullAssignment.c
@@ -52,4 +59,4 @@ build $builddir\_coder_theta_model_P_info.obj : cc $root\interface\_coder_theta_
 build $builddir\c_mexapi_version.obj : cc $matlabdir\extern\version\c_mexapi_version.c
 
 # Link
-build $root\theta_model_P_mex.mexw64 : link $builddir\rt_nonfinite.obj $builddir\theta_model_P_data.obj $builddir\theta_model_P_initialize.obj $builddir\theta_model_P_terminate.obj $builddir\theta_model_P.obj $builddir\randn.obj $builddir\mtimes.obj $builddir\indexShapeCheck.obj $builddir\nullAssignment.obj $builddir\_coder_theta_model_P_api.obj $builddir\_coder_theta_model_P_mex.obj $builddir\theta_model_P_emxutil.obj $builddir\_coder_theta_model_P_info.obj $builddir\c_mexapi_version.obj 
+build $root\theta_model_P_mex.mexw64 : link $builddir\rt_nonfinite.obj $builddir\theta_model_P_mexutil.obj $builddir\theta_model_P_data.obj $builddir\theta_model_P_initialize.obj $builddir\theta_model_P_terminate.obj $builddir\theta_model_P.obj $builddir\rand.obj $builddir\eml_rand.obj $builddir\eml_rand_mcg16807_stateful.obj $builddir\eml_rand_shr3cong_stateful.obj $builddir\eml_rand_mt19937ar_stateful.obj $builddir\applyScalarFunction.obj $builddir\log2.obj $builddir\mtimes.obj $builddir\indexShapeCheck.obj $builddir\nullAssignment.obj $builddir\_coder_theta_model_P_api.obj $builddir\_coder_theta_model_P_mex.obj $builddir\theta_model_P_emxutil.obj $builddir\_coder_theta_model_P_info.obj $builddir\c_mexapi_version.obj 

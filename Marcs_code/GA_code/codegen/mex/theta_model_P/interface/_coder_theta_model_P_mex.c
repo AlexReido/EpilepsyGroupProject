@@ -15,7 +15,11 @@
 #include "theta_model_P.h"
 #include "theta_model_P_data.h"
 #include "theta_model_P_initialize.h"
+#include "theta_model_P_mexutil.h"
 #include "theta_model_P_terminate.h"
+
+/* Variable Definitions */
+static jmp_buf emlrtJBEnviron;
 
 /* Function Declarations */
 MEXFUNCTION_LINKAGE void theta_model_P_mexFunction(int32_T nlhs, mxArray *plhs[1],
@@ -54,21 +58,40 @@ void theta_model_P_mexFunction(int32_T nlhs, mxArray *plhs[1], int32_T nrhs,
 void mexFunction(int32_T nlhs, mxArray *plhs[], int32_T nrhs, const mxArray
                  *prhs[])
 {
+  emlrtStack st = { NULL,              /* site */
+    NULL,                              /* tls */
+    NULL                               /* prev */
+  };
+
   mexAtExit(&theta_model_P_atexit);
+
+  /* Initialize the memory manager. */
+  omp_init_lock(&emlrtLockGlobal);
+  omp_init_nest_lock(&emlrtNestLockGlobal);
 
   /* Module initialization. */
   theta_model_P_initialize();
+  st.tls = emlrtRootTLSGlobal;
+  emlrtSetJmpBuf(&st, &emlrtJBEnviron);
+  if (setjmp(emlrtJBEnviron) == 0) {
+    /* Dispatch the entry-point. */
+    theta_model_P_mexFunction(nlhs, plhs, nrhs, prhs);
 
-  /* Dispatch the entry-point. */
-  theta_model_P_mexFunction(nlhs, plhs, nrhs, prhs);
-
-  /* Module termination. */
-  theta_model_P_terminate();
+    /* Module termination. */
+    theta_model_P_terminate();
+    omp_destroy_lock(&emlrtLockGlobal);
+    omp_destroy_nest_lock(&emlrtNestLockGlobal);
+  } else {
+    omp_destroy_lock(&emlrtLockGlobal);
+    omp_destroy_nest_lock(&emlrtNestLockGlobal);
+    emlrtReportParallelRunTimeError(&st);
+  }
 }
 
 emlrtCTX mexFunctionCreateRootTLS(void)
 {
-  emlrtCreateRootTLS(&emlrtRootTLSGlobal, &emlrtContextGlobal, NULL, 1);
+  emlrtCreateRootTLS(&emlrtRootTLSGlobal, &emlrtContextGlobal,
+                     &emlrtLockerFunction, omp_get_num_procs());
   return emlrtRootTLSGlobal;
 }
 
