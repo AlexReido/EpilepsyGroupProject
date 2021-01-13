@@ -12,6 +12,10 @@
 /* Include files */
 #include "theta_model_P_terminate.h"
 #include "_coder_theta_model_P_mex.h"
+#include "eml_rand.h"
+#include "eml_rand_mcg16807_stateful.h"
+#include "eml_rand_mt19937ar_stateful.h"
+#include "eml_rand_shr3cong_stateful.h"
 #include "rt_nonfinite.h"
 #include "theta_model_P.h"
 #include "theta_model_P_data.h"
@@ -27,6 +31,10 @@ void theta_model_P_atexit(void)
   mexFunctionCreateRootTLS();
   st.tls = emlrtRootTLSGlobal;
   emlrtEnterRtStackR2012b(&st);
+  c_eml_rand_mt19937ar_stateful_f();
+  eml_rand_shr3cong_stateful_free();
+  eml_rand_mcg16807_stateful_free();
+  eml_rand_free();
   emlrtLeaveRtStackR2012b(&st);
   emlrtDestroyRootTLS(&emlrtRootTLSGlobal);
   emlrtExitTimeCleanup(&emlrtContextGlobal);

@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * randn.h
+ * eml_rand_mt19937ar_stateful.h
  *
- * Code generation for function 'randn'
+ * Code generation for function 'eml_rand_mt19937ar_stateful'
  *
  */
 
@@ -19,9 +19,11 @@
 #include "mex.h"
 #include "emlrt.h"
 #include "rtwtypes.h"
+#include "omp.h"
 #include "theta_model_P_types.h"
 
 /* Function Declarations */
-void randn(real_T varargin_1, real_T r_data[], int32_T r_size[1]);
+void c_eml_rand_mt19937ar_stateful_f(void);
+void c_eml_rand_mt19937ar_stateful_i(void);
 
-/* End of code generation (randn.h) */
+/* End of code generation (eml_rand_mt19937ar_stateful.h) */

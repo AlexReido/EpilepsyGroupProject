@@ -1,12 +1,23 @@
+from math import sqrt
+
 import numpy as np
 import random as rand
 
 from scipy import io
+from scipy.special import erfinv
 
 import compute_theta as ct
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
-from Tests.test_SimulateDynamics import randn2
+
+
+def randn2(*args, **kwargs):
+    '''
+    Calls rand and applies inverse transform sampling to the output.
+    Used to generate exact same random numbers as the reference matlab implementation
+    '''
+    uniform = np.random.rand(*args, **kwargs)
+    return sqrt(2) * erfinv(2 * uniform - 1)
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
@@ -44,7 +55,7 @@ def numba_compute_theta(t, wnet, nodes, seed=1337):
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
 
-def compute_theta(t, wnet, nodes):
+def compute_theta(t, wnet, nodes, seed=1337):
     """
     Compute the time series using the Euler-Maruyama method.
 
@@ -55,6 +66,10 @@ def compute_theta(t, wnet, nodes):
     :param threshold: threshold value for BNI.
     :return: time series of the network.
     """
+
+    if seed == 1337:  # for testing purposes
+        np.random.seed(seed)  # must seed inside function as using numba
+
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
 
     # Compute time series
@@ -93,7 +108,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
     bni = np.zeros((nodes, 1))
 
     #x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    #x = compute_theta(t, wnet, nodes)  # default vectorised python implementation
+    #x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
     x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
 
     # Compute bni
@@ -253,7 +268,17 @@ def bni_find(net, t=4000000, seed=1337):
 
 
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
+    """
+    DeltaBNI calculation for a specific network topology.
 
+    :param num_resect_nodes: The number of resected nodes.
+    :param individ: A binary array that corresponds to an individual (1 for secting the node, 0 for keeping the node).
+    :param w: The coupling value for which BNI = 0.5.
+    :param net: Network topology.
+    :param t: timesteps
+    :param seed: controls the random distribution
+    :return: DeltaBNI of the network for the specific resection as specified by the individ
+    """
     # Allocate delta_bni matrix: (1 x noise realiz)
     delta_bni = np.ones((1, CONSTANTS.N_N))
 
@@ -266,6 +291,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     # Remove columns from the resected nodes
     net = np.delete(net, resected_position[0], axis=1)
 
+    # TODO multi thread this loop
     # Calculate delta_bni for different noise runs
     for noise in range(CONSTANTS.N_N):
         delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
@@ -277,6 +303,21 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
 
 
 def fitness_function(x, w, net, t=4000000, seed=1337):
+    """
+    Multi-objective fitness function for the optimisation of the removal combination of an epileptic network.
+
+    :param x: Binary matrix with size (population size) x (network size).
+              Each row corresponds to a different individual and each column to a node of the network.
+              1 stands for removal and 0 for maintenance of the node.
+    :param w: coupling value for which BNI=0.5.
+    :param net: The network adjacency matrix.
+    :param t: The number of time steps.
+    :param seed: Controls the random distribution.
+    :return: A matrix with with the fitness values. Its size is (population size) x2. Each row corresponds to a
+             different individual and the two columns stand for the objective functions. The 1st column returns the sum
+             of the resected nodes and the 2nd column gives the 1-DBNI values.
+    """
+
     # count the number of individuals
     pop_size = len(x)
 
@@ -289,6 +330,7 @@ def fitness_function(x, w, net, t=4000000, seed=1337):
     # allocate a matrix for the output
     y2 = np.ones(pop_size)
 
+    # TODO vectorise and multithread loop?
     # Calculate the fitness for each individual
     for count_indiv in range(pop_size):
         individ = x[count_indiv, :]
@@ -337,9 +379,10 @@ def optimrun(generations, population, work_item, net, w):
     # Execute the NSGA-II
 
 
-def main_script():
+if __name__ == '__main__':
 
-    network = io.loadmat('..\\resources\\net.mat')
+    network = io.loadmat('resources\\net.mat')
+    net = network['net']
 
     # first check if the network has ones in its main diagonal (if yes we delete them)
     length_net = len(network)
