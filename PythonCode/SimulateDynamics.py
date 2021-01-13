@@ -50,7 +50,8 @@ def numba_compute_theta(t, wnet, nodes, seed=1337):
         cos_theta_old = np.cos(theta[time - 1, :])
         ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + np.dot(wnet, 1 - np.cos(
             theta[time - 1, :] - theta[0, :]))
-        theta[time, :] = theta[time - 1, :] + (CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
+        theta[time, :] = theta[time - 1, :] + (
+                    CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
 
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
@@ -80,9 +81,10 @@ def compute_theta(t, wnet, nodes, seed=1337):
 
     for time in np.arange(1, t):
         cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = i_0 + rand_i_sig[:, time-1:time] + np.dot(wnet, 1 - np.cos(
+        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + np.dot(wnet, 1 - np.cos(
             theta[time - 1, :] - theta[0, :]))
-        theta[time, :] = theta[time - 1, :] + (CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
+        theta[time, :] = theta[time - 1, :] + (
+                    CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
 
     return np.squeeze(1 - np.cos(theta - theta[0, :])) * 0.5 > CONSTANTS.THRESHOLD
 
@@ -101,14 +103,14 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
     nodes = len(net)  # number of nodes
 
     # normalisation of coupling
-    wnet = np.dot(w, net) / (nodes + nodes_resected)
+    wnet = w * net / (nodes + nodes_resected)
     wnet = np.ascontiguousarray(wnet.conj().T)  # Complex conjugate transpose
 
     # allocate matrices and set the values of the theta model for the integration with Euler-Maruyama
     bni = np.zeros((nodes, 1))
 
-    #x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    #x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
+    # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
+    # x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
     x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
 
     # Compute bni
@@ -203,7 +205,7 @@ def bni_find(net, t=4000000, seed=1337):
         w_save[it - 1] = w
         bni_aux1 = np.mean(np.mean(np.squeeze(bni[:, :, it - 1]), keepdims=True, axis=0), keepdims=True, axis=1)
         bni_aux2 = np.mean(np.mean(np.squeeze(bni[:, :, :it]), keepdims=True, axis=0), axis=1, keepdims=True)
-        #print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
+        # print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
             # Lucky guess:
@@ -346,52 +348,3 @@ def fitness_function(x, w, net, t=4000000, seed=1337):
     y[:, 0] = y1
     y[:, 1] = y2
     return y
-
-
-class Solutions:
-
-    generations = 0
-
-    def __init__(self, name):
-        self.name = name
-
-
-def optimrun(generations, population, work_item, net, w):
-
-    # Network size in nodes
-    nodes = len(net)
-    np.random.seed('shuffle')
-
-    # Create struct to save individuals of each generation
-    all_solutions = Solutions('all')
-    # All solutions.target.ts = target_ts
-    all_solutions.generations = 1
-
-    # Set NSGA-II fitness function and parameters
-    # fitfunc = (x)fitnessfun(x, w, net)
-
-    # NSGA-II parameters
-    # optGA = gaoptimset
-
-    # start profiler parameters
-    # ga_start = tic
-
-    # Execute the NSGA-II
-
-
-if __name__ == '__main__':
-
-    network = io.loadmat('resources\\net.mat')
-    net = network['net']
-
-    # first check if the network has ones in its main diagonal (if yes we delete them)
-    length_net = len(network)
-    if (np.diag(network) == np.ones((length_net, 1))).all:
-        network = network - np.eye(length_net)
-
-    # compute the reference coupling value, for which BNI = 0.5
-    ref_coupling, BNI_test_values, coupling_test_values = bni_find(network)
-
-    # apply the GA
-    for count_runs in range(CONSTANTS.num_GA_runs):
-        optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
