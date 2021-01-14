@@ -31,6 +31,12 @@ class TestSimulateDynamics(unittest.TestCase):
         # self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
         self.assertEqual(bni, TEST_CONSTANTS.BNI_RANDN)  # when using np.random.randn
 
+        # nodes = 25
+        # nodes resected = 34
+        # seed = 1337
+        # t = 4000
+        # w = 245.8085686
+
     def test_bni_find(self):
         t = TEST_CONSTANTS.FAST_TIME_STEPS
         ref_coupling, BNI_test_values, coupling_test_values = SD.bni_find(self.network, t=t, seed=self.seed)
