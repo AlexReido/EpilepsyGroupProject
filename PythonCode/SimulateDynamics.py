@@ -62,7 +62,6 @@ def compute_theta(t, wnet, nodes, seed=1337):
 
     :param t: time steps.
     :param wnet: normalisation of coupling.
-    :param dt: time step for the integration.
     :param nodes: number of nodes in the network.
     :param threshold: threshold value for BNI.
     :return: time series of the network.
@@ -271,12 +270,12 @@ def bni_find(net, t=4000000, seed=1337):
 
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     """
-    DeltaBNI calculation for a specific network topology.
+    DeltaBNI calculation for the given network.
 
     :param num_resect_nodes: The number of resected nodes.
-    :param individ: A binary array that corresponds to an individual (1 for secting the node, 0 for keeping the node).
+    :param individ: A binary array that corresponds to an individual (1 for resecting the node, 0 for keeping the node).
     :param w: The coupling value for which BNI = 0.5.
-    :param net: Network topology.
+    :param net: Network.
     :param t: timesteps
     :param seed: controls the random distribution
     :return: DeltaBNI of the network for the specific resection as specified by the individ

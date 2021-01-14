@@ -27,6 +27,7 @@ class MyProblem(Problem):
         out["F"] = np.column_stack([f1, f2])
 
         # problem constraints
+        # f1 should be greater than 0?
         #g1 = 2 * (X[:, 0] - 0.1) * (X[:, 0] - 0.9) / 0.18
         #g2 = - 20 * (X[:, 0] - 0.4) * (X[:, 0] - 0.6) / 4.8
         #out["G"] = np.column_stack([g1, g2])
@@ -50,14 +51,14 @@ def main():
 
 
 if __name__ == '__main__':
-    network = io.loadmat('resources\\net.mat')
+    network = io.loadmat('resources\\net.mat')  # TODO try with much smaller network to speed things up, or reduce N_N value?
     net = network['net']
     # compute the reference coupling value, for which BNI = 0.5
     ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, t=4000)
     vectorized_problem = MyProblem(len(net), ref_coupling, net)
 
     algorithm = NSGA2(
-        pop_size=200,
+        pop_size=10,
         sampling=get_sampling("bin_random"),
         crossover=get_crossover("bin_ux"),
         mutation=get_mutation("bin_bitflip"),
@@ -71,4 +72,4 @@ if __name__ == '__main__':
                    save_history=True,
                    verbose=True)
 
-    print(- res.F) # final fitness
+    print(- res.F)  # final fitness
