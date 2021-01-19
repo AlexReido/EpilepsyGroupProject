@@ -9,6 +9,7 @@ from scipy.special import erfinv
 import compute_theta as ct
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
+import pass_to_C
 
 
 def randn2(*args, **kwargs):
@@ -109,8 +110,12 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
     bni = np.zeros((nodes, 1))
 
     # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    # x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
-    x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
+    #x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
+    #x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
+    x = np.zeros((t, nodes))  # allocated for output
+    rand_i_sig = (CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)) * np.ascontiguousarray(randn2(t, nodes).transpose())
+    pass_to_C.send_to_C(t, wnet, nodes, x, rand_i_sig)
+
 
     # Compute bni
     for node in range(nodes):
@@ -292,7 +297,6 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     # Remove columns from the resected nodes
     net = np.delete(net, resected_position[0], axis=1)
 
-    # TODO multi thread this loop
     # Calculate delta_bni for different noise runs
     for noise in range(CONSTANTS.N_N):
         delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
