@@ -15,7 +15,7 @@ function BNI=theta_model_P(net,w,nodes_resected)
 %rng('shuffle');it is not supported for the convertion to the mex files
 
 % Fixed parameters:
-T = 4000;         % time steps
+T = 4000000;         % time steps
 I_0 = -1.2;         % distance to SNIC
 I_sig = 5*1.2*0.1;  % noise level
 dt = 10^-2;         % time step for the integration

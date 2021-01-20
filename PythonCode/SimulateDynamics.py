@@ -3,6 +3,7 @@ from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
 from Tests import TEST_CONSTANTS
+from Tests.test_SimulateDynamics import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
@@ -86,7 +87,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     # Compute time series
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
     rand_i_sig = i_sig * np.random.randn(nodes, t)
-    # rand_i_sig = i_sig * randn2(t, nodes).transpose  # transpose to give same values as matlab
+    #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
     # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
     # x = compute_theta(t, wnet, nodes, rand_i_sig)  # default vectorised python implementation

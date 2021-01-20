@@ -37,7 +37,7 @@ class TestSimulateDynamics(unittest.TestCase):
         num_nodes_resected = 0  # test for BNI of whole network
         t = TEST_CONSTANTS.TIME_STEPS
         bni = SD.theta_model_p(self.network, w, num_nodes_resected, t)
-        # self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
+        #self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
         self.assertEqual(TEST_CONSTANTS.BNI_RANDN, bni)  # when using np.random.randn
         # TODO test with different w values and nodes resected values
 
