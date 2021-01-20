@@ -3,6 +3,7 @@ from random import randint
 
 import numpy as np
 from scipy import io
+from scipy.special import erfinv
 import PythonCode.SimulateDynamics as SD
 from Tests import TEST_CONSTANTS
 
@@ -11,11 +12,19 @@ def generate_fitness_matrix(population_size, nodes):
     return np.full((population_size, nodes), randint(0, 1))
 
 
+def randn2(*args, **kwargs):
+    '''
+    Calls rand and applies inverse transform sampling to the output.
+    Used to generate exact same random numbers as the reference matlab implementation
+    '''
+    uniform = np.random.rand(*args, **kwargs)
+    return np.sqrt(2) * erfinv(2 * uniform - 1)
+
+
 class TestSimulateDynamics(unittest.TestCase):
 
     def setUp(self):
-        self.seed = 1337  # Test seed, DO NOT CHANGE! Numba seed does not work exactly the same
-        np.random.seed(self.seed)  # seed to produce 1.3736e-04 for 'net' with randn2
+        np.random.seed(TEST_CONSTANTS.SEED)  # seed to produce 1.3736e-04 for 'net' with randn2
         mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
         self.network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
         self.population_size = TEST_CONSTANTS.POPULATION_SIZE
@@ -27,20 +36,16 @@ class TestSimulateDynamics(unittest.TestCase):
         w = TEST_CONSTANTS.GLOBAL_COUPLING
         num_nodes_resected = 0  # test for BNI of whole network
         t = TEST_CONSTANTS.TIME_STEPS
-        bni = SD.theta_model_p(self.network, w, num_nodes_resected, t, seed=self.seed)
-        # self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
-        self.assertEqual(bni, TEST_CONSTANTS.BNI_RANDN)  # when using np.random.randn
-
-        # nodes = 25
-        # nodes resected = 34
-        # seed = 1337
-        # t = 4000
-        # w = 245.8085686
+        bni = SD.theta_model_p(self.network, w, num_nodes_resected, t)
+        #self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
+        self.assertEqual(TEST_CONSTANTS.BNI_RANDN, bni)  # when using np.random.randn
+        # TODO test with different w values and nodes resected values
 
     def test_bni_find(self):
         t = TEST_CONSTANTS.FAST_TIME_STEPS
-        ref_coupling, BNI_test_values, coupling_test_values = SD.bni_find(self.network, t=t, seed=self.seed)
-        self.assertEqual(ref_coupling[0], TEST_CONSTANTS.REF_COUPLING)
+        ref_coupling, BNI_test_values, coupling_test_values = SD.bni_find(self.network, t)
+        self.assertEqual(TEST_CONSTANTS.REF_COUPLING, ref_coupling[0])
+        # TODO failing
 
     def test_ref_bni(self):
         w = np.array([[25], [50], [100], [200], [225], [237.5], [250], [300]], dtype=object)
