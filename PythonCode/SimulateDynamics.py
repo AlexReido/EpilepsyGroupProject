@@ -37,33 +37,6 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
 
-def compute_theta(t, wnet, nodes, rand_i_sig):
-    """
-    Compute the time series using the Euler-Maruyama method.
-
-    :param rand_i_sig:
-    :param t: time steps.
-    :param wnet: normalisation of coupling.
-    :param nodes: number of nodes in the network.
-    :param threshold: threshold value for BNI.
-    :return: time series of the network.
-    """
-
-    theta = np.empty((t, nodes, 1))
-    i_0 = CONSTANTS.DIST
-    initial_theta = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
-    theta[0, :] = initial_theta
-
-    for time in np.arange(1, t):
-        cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
-            theta[time - 1, :] - theta[0, :])))
-        theta[time, :] = theta[time - 1, :] + (
-                    CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
-
-    return np.squeeze(1 - np.cos(theta - theta[0, :])) * 0.5 > CONSTANTS.THRESHOLD
-
-
 def theta_model_p(net, w, nodes_resected, t=4000000):
     """
     This function calculates bni.
@@ -89,8 +62,6 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     rand_i_sig = i_sig * np.random.randn(nodes, t)
     #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
-    # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    # x = compute_theta(t, wnet, nodes, rand_i_sig)  # default vectorised python implementation
     x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
 
     # Compute bni
