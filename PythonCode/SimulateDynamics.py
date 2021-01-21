@@ -1,31 +1,18 @@
-from math import sqrt
-
 import numpy as np
-import random as rand
-
 from scipy import io
-from scipy.special import erfinv
-
-import compute_theta as ct
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
-
-
-def randn2(*args, **kwargs):
-    '''
-    Calls rand and applies inverse transform sampling to the output.
-    Used to generate exact same random numbers as the reference matlab implementation
-    '''
-    uniform = np.random.rand(*args, **kwargs)
-    return sqrt(2) * erfinv(2 * uniform - 1)
+from Tests import TEST_CONSTANTS
+from Tests.test_SimulateDynamics import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
-def numba_compute_theta(t, wnet, nodes, seed=1337):
+def numba_compute_theta(t, wnet, nodes, rand_i_sig):
     """
     Compute the time series using the Euler-Maruyama method.
     This method uses the numba library for JIT.
 
+    :param rand_i_sig:
     :param t: time steps.
     :param wnet: normalisation of coupling.
     :param dt: time step for the integration.
@@ -35,60 +22,22 @@ def numba_compute_theta(t, wnet, nodes, seed=1337):
     :return: time series of the network.
     """
 
-    if seed == 1337:  # for testing purposes
-        np.random.seed(seed)  # must seed inside function as using numba
-
-    i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
-
-    # Compute time series
-    rand_i_sig = i_sig * np.random.randn(t, nodes).transpose()  # transpose to give same values as matlab
     theta = np.empty((t, nodes, 1))
-    i_0 = np.full((nodes, 1), CONSTANTS.DIST)
-    theta[0, :] = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
+    i_0 = CONSTANTS.DIST
+    initial_theta = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
+    theta[0, :] = initial_theta
 
     for time in np.arange(1, t):
         cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + np.dot(wnet, 1 - np.cos(
-            theta[time - 1, :] - theta[0, :]))
+        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
+            theta[time - 1, :] - theta[0, :])))
         theta[time, :] = theta[time - 1, :] + (
                     CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
 
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
 
-def compute_theta(t, wnet, nodes, seed=1337):
-    """
-    Compute the time series using the Euler-Maruyama method.
-
-    :param t: time steps.
-    :param wnet: normalisation of coupling.
-    :param nodes: number of nodes in the network.
-    :param threshold: threshold value for BNI.
-    :return: time series of the network.
-    """
-
-    if seed == 1337:  # for testing purposes
-        np.random.seed(seed)  # must seed inside function as using numba
-
-    i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
-
-    # Compute time series
-    rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
-    theta = np.empty((t, nodes, 1))
-    i_0 = np.full((nodes, 1), CONSTANTS.DIST)
-    theta[0, :] = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
-
-    for time in np.arange(1, t):
-        cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + np.dot(wnet, 1 - np.cos(
-            theta[time - 1, :] - theta[0, :]))
-        theta[time, :] = theta[time - 1, :] + (
-                    CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
-
-    return np.squeeze(1 - np.cos(theta - theta[0, :])) * 0.5 > CONSTANTS.THRESHOLD
-
-
-def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
+def theta_model_p(net, w, nodes_resected, t=4000000):
     """
     This function calculates bni.
 
@@ -108,9 +57,12 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
     # allocate matrices and set the values of the theta model for the integration with Euler-Maruyama
     bni = np.zeros((nodes, 1))
 
-    # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
-    # x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
-    x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
+    # Compute time series
+    i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
+    rand_i_sig = i_sig * np.random.randn(nodes, t)
+    #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
+
+    x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
 
     # Compute bni
     for node in range(nodes):
@@ -173,7 +125,7 @@ def ref_bni(w, bni, ref):
     return w_ref
 
 
-def bni_find(net, t=4000000, seed=1337):
+def bni_find(net, t=4000000):
     """
     Calculates the coupling value for which bni = 0.5.
 
@@ -199,12 +151,12 @@ def bni_find(net, t=4000000, seed=1337):
     while z:
         it += 1
         for noise in range(CONSTANTS.N_N):
-            bni[:, noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t, seed=seed)
+            bni[:, noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
 
         w_save[it - 1] = w
         bni_aux1 = np.mean(np.mean(np.squeeze(bni[:, :, it - 1]), keepdims=True, axis=0), keepdims=True, axis=1)
         bni_aux2 = np.mean(np.mean(np.squeeze(bni[:, :, :it]), keepdims=True, axis=0), axis=1, keepdims=True)
-        # print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
+        print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
             # Lucky guess:
@@ -268,7 +220,7 @@ def bni_find(net, t=4000000, seed=1337):
     return ref_coupling, bni_test_values, coupling_test_values
 
 
-def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
+def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     """
     DeltaBNI calculation for the given network.
 
@@ -295,7 +247,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     # TODO multi thread this loop
     # Calculate delta_bni for different noise runs
     for noise in range(CONSTANTS.N_N):
-        delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t, seed=seed)) / 0.5
+        delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t)) / 0.5
 
     # Set value to the return value
     # Calculate the mean across the noise runs
@@ -303,7 +255,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000, seed=1337):
     return delta_bni
 
 
-def fitness_function(x, w, net, t=4000000, seed=1337):
+def fitness_function(x, w, net, t=4000000):
     """
     Multi-objective fitness function for the optimisation of the removal combination of an epileptic network.
 
@@ -341,9 +293,14 @@ def fitness_function(x, w, net, t=4000000, seed=1337):
 
         # 2nd objective function : DeltaBNI (We want to maximize DBNI, but
         # we put 1-DeltaBNI because the algorithm minimizes the objective functions)
-        y2[count_indiv] = 1 - delta_bni_r_dir(y1[count_indiv], individ, w, net, t, seed)
+        y2[count_indiv] = 1 - delta_bni_r_dir(y1[count_indiv], individ, w, net, t)
 
     # Set values to the return value
     y[:, 0] = y1
     y[:, 1] = y2
     return y
+
+if __name__ == "__main__":
+    mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
+    network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
+    bni = theta_model_p(network, 25, 0, 4000)
