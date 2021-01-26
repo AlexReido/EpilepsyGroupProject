@@ -3,7 +3,7 @@ from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
 from Tests import TEST_CONSTANTS
-from Tests.test_SimulateDynamics import randn2
+# from Tests.test_SimulateDynamics import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
@@ -199,7 +199,7 @@ def bni_find(net, t=4000000):
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
             #  TODO error in reference implementation? w above is redundant
-            w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
+            # w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
 
         if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
             z = False

@@ -22,7 +22,7 @@ class MyProblem(Problem):
         self.seed = 1337
 
     def _evaluate(self, X, out, *args, **kwargs):
-        y = fitness_function(X, self.w, self.net, self.t, self.seed)
+        y = fitness_function(X, self.w, self.net, self.t )#self.seed
         f1 = y[:, 0]
         f2 = y[:, 1]
         out["F"] = np.column_stack([f1, f2])
