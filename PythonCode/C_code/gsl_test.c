@@ -1,22 +1,33 @@
 #include <stdio.h>
-#include <gsl_rng.h>
-#include <gsl/gsl_randist.h>
+#include <gsl/gsl_blas.h>
 
-int main (int argc, char *argv[])
+int
+main (void)
 {
-  /* set up GSL RNG */
-  gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937);
-  /* end of GSL setup */
 
-  int i,n;
-  double gauss,gamma;  
+  double *a = malloc(sizeof(double[4]));
+  double *b = malloc(sizeof(double[4]));
+  double *c = malloc(sizeof(double[4]));
 
-  n=atoi(argv[1]);
-  for (i=0;i<n;i++)
-    {
-      gauss=gsl_ran_gaussian(r,2.0);
-      gamma=gsl_ran_gamma(r,2.0,3.0);
-      printf("%2.4f %2.4f\n", gauss,gamma);
-    }
-  return(0);
+  int i;
+  for(int i=0; i<4; i++){
+      a[i] = 0.5;
+      b[i] = 2;
+      c[i] = 0;
+  }
+
+  gsl_matrix_view A = gsl_matrix_view_array(a, 2, 2);
+  gsl_matrix_view B = gsl_matrix_view_array(b, 2, 2);
+  gsl_matrix_view C = gsl_matrix_view_array(c, 2, 2);
+
+  /* Compute C = A B */
+
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans,
+                  1.0, &A.matrix, &B.matrix,
+                  0.0, &C.matrix);
+
+  printf ("[ %g, %g\n", c[0], c[1]);
+  printf ("  %g, %g ]\n", c[2], c[3]);
+
+  return 0;
 }

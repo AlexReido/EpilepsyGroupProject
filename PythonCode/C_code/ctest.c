@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include <complex.h>    /* Standard Library of Complex Numbers */
+#include <complex.h>  
+#include <gsl/gsl_sf_bessel.h>  /* Standard Library of Complex Numbers */
+#include <gsl/gsl_blas.h>
 
 // A is m rows by k columns
 // B is k rows by n columns
@@ -35,6 +37,10 @@ void cfun(const int t, double *wnet, const int nodes, double *x, double *rand_i_
     double *ictogenicity = malloc(sizeof(double[nodes]));
     double *dot = malloc(sizeof(double[nodes]));
 
+    gsl_matrix_view A;
+    gsl_matrix_view B;
+    gsl_matrix_view C;
+
     for (time = 1; time < t; time++){
         for(i=0; i<nodes; i++){
             cos_theta_old[i] = cos(theta[time-1][i]);  // find all
@@ -44,8 +50,10 @@ void cfun(const int t, double *wnet, const int nodes, double *x, double *rand_i_
         for(i=0; i<nodes; i++){
             theta_diff[i] = 1 - cos(theta[time-1][i] - initial_theta);
         }
-
-        multiply(wnet, nodes, nodes, theta_diff, nodes, 1, dot);
+        A = gsl_matrix_view_array(wnet, nodes, nodes);
+        B = gsl_matrix_view_array(theta_diff, nodes, 1);
+        C = gsl_matrix_view_array(dot, nodes, 1);
+        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &A.matrix, &B.matrix, 0.0, &C.matrix);
         for(i=0; i<nodes; i++){
             ictogenicity[i] = dist + rand_i_sig[(time*nodes)+i] + dot[i];  // TODO use random_normal() here instead
         }

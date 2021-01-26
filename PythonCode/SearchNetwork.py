@@ -17,7 +17,7 @@ class MyProblem(Problem):
                          n_constr=0)
         self.w = coupling_value
         self.net = network
-        self.t = 400000
+        self.t = 4000
         self.seed = 1337
 
     def _evaluate(self, X, out, *args, **kwargs):

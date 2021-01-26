@@ -1,1 +1,2 @@
 gcc -fPIC -shared ctest.c -o ctest.so
+gcc -fPIC -shared ctest.c -L/usr/local/lib -lgsl -o ctest.so -L/usr/bin
