@@ -1,3 +1,5 @@
+from time import time, ctime
+
 import numpy as np
 from scipy import io
 import numba as nb
@@ -23,13 +25,11 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
     """
 
     theta = np.empty((t, nodes, 1))
-    i_0 = CONSTANTS.DIST
-    initial_theta = -np.real(np.arccos(np.divide(1 + i_0, 1 - i_0)))  # stable point if i_0 < 0
-    theta[0, :] = initial_theta
+    theta[0, :] = -np.real(np.arccos(np.divide(1 + CONSTANTS.DIST, 1 - CONSTANTS.DIST)))  # stable point if i_0 < 0
 
     for time in np.arange(1, t):
         cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = i_0 + rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
+        ictogenicity = rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
             theta[time - 1, :] - theta[0, :])))
         theta[time, :] = theta[time - 1, :] + (
                     CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
@@ -59,7 +59,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
 
     # Compute time series
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
-    rand_i_sig = i_sig * np.random.randn(nodes, t)
+    rand_i_sig = (i_sig * np.random.randn(nodes, t)) + CONSTANTS.DIST
     #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
     x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
