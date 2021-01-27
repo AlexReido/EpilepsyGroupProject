@@ -70,6 +70,25 @@ void cfun(const int t, double *wnet, const int nodes, double *x, double *rand_i_
     // need 20489 ones
 }
 
+int readmatrix(size_t rows, size_t cols, double *a, const char* filename)
+{
+
+    FILE *pf;
+    pf = fopen (filename, "r");
+    if (pf == NULL)
+        return 0;
+
+    for(size_t i = 0; i < rows; ++i)
+    {
+        for(size_t j = 0; j < cols; ++j)
+            fscanf(pf, "%lf", a[i+j]);
+    }
+
+
+    fclose (pf); 
+    return 1; 
+}
+
 int main(){
     const int t = 4000000;
     const int nodes = 59;
@@ -77,24 +96,7 @@ int main(){
     double *x = malloc(sizeof(double[nodes*t]));;
     double *rand_i_sig = malloc(sizeof(double[nodes*t]));;
 
-    int i,j;
-    for(int i=0; i<nodes; i++){
-        for(int j=0; j<nodes; j++){
-            wnet[(i * nodes) + j] = 0.5;
-        }
-    }
-
-    for(int i=0; i<t; i++){
-        for(int j=0; j<nodes; j++){
-            x[i * nodes + j] = 0;
-        }
-    }
-
-    for(int i=0; i<nodes; i++){
-        for(int j=0; j<t; j++){
-            rand_i_sig[i * nodes + j] = 1;
-        }
-    }
+    readmatrix(nodes, nodes, wnet, "wnet.dat");
 
     cfun(t, wnet, nodes, x, rand_i_sig);
 

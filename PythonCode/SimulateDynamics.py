@@ -111,8 +111,8 @@ def theta_model_p(net, w, nodes_resected, t=4000000, seed=1337):
 
     # x = ct.compute_theta(t, wnet, CONSTANTS.DT, nodes, CONSTANTS.THRESHOLD)  # Cython, use python setup.py build_ext --inplace
     #x = compute_theta(t, wnet, nodes, seed=seed)  # default vectorised python implementation
-    x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
-    #x = np.zeros((t, nodes))  # allocated for output
+    #x = numba_compute_theta(t, wnet, nodes, seed=seed)  # python with numba library (fastest)
+    x = np.zeros((t, nodes))  # allocated for output
     rand_i_sig = (CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)) * np.ascontiguousarray(randn2(t, nodes).transpose())
     pass_to_C.send_to_C(t, wnet, nodes, x, rand_i_sig)
 
