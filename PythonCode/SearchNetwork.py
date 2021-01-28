@@ -22,19 +22,19 @@ class MyProblem(Problem):
         self.seed = 1337
 
     def _evaluate(self, X, out, *args, **kwargs):
-        y = fitness_function(X, self.w, self.net, self.t )#self.seed
+        y = fitness_function(X, self.w, self.net, self.t)  # self.seed
         f1 = y[:, 0]
         f2 = y[:, 1]
         out["F"] = np.column_stack([f1, f2])
 
         # problem constraints
         # f1 should be greater than 0?
-        #g1 = 2 * (X[:, 0] - 0.1) * (X[:, 0] - 0.9) / 0.18
-        #g2 = - 20 * (X[:, 0] - 0.4) * (X[:, 0] - 0.6) / 4.8
-        #out["G"] = np.column_stack([g1, g2])
+        # g1 = 2 * (X[:, 0] - 0.1) * (X[:, 0] - 0.9) / 0.18
+        # g2 = - 20 * (X[:, 0] - 0.4) * (X[:, 0] - 0.6) / 4.8
+        # out["G"] = np.column_stack([g1, g2])
 
 
-def main(): # TODO is this needed? (has different timestep variable).
+def main():  # TODO is this needed? (has different timestep variable).
     network = io.loadmat('resources\\net.mat')
     net = network['net']
 
@@ -44,57 +44,68 @@ def main(): # TODO is this needed? (has different timestep variable).
         network = network - np.eye(length_net)
 
     # compute the reference coupling value, for which BNI = 0.5
-    ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, t=40000)
+    ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, t=4000)
 
     # apply the GA
-    #for count_runs in range(CONSTANTS.num_GA_runs):
-        # optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
+    # for count_runs in range(CONSTANTS.num_GA_runs):
+    # optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
+
+
+class SearchNetwork:
+    """
+     binary random sampling, binary tournament selection, binary bit flip, and single point binary cross over
+    """
+    def __init__(self, searchAlgo, network=None, timesteps=4000):
+        self.searchAlgo = searchAlgo
+        self.timesteps = timesteps
+        if network is None:
+            network = io.loadmat('resources\\net.mat')
+            self.net = network['net']
+        else:
+            self.net = network
+
+    def search(self, nGen = 100):
+        # compute the reference coupling value, for which BNI = 0.5
+        print("Finding reference coupling:")
+        ref_coupling, BNI_test_values, coupling_test_values = bni_find(self.net, self.timesteps)
+        vectorized_problem = MyProblem(len(self.net), ref_coupling, self.net, self.timesteps)
+        termination = get_termination("n_gen", nGen)
+
+        if self.searchAlgo == "MOEAD":
+            print("MOEAD")
+            search = MOEAD(
+                get_reference_directions("energy", 2, 10),
+                pop_size=10,
+                sampling=get_sampling("bin_random"),
+                crossover=get_crossover("bin_ux"),
+                mutation=get_mutation("bin_bitflip"),
+                eliminate_duplicates=True
+            )
+        elif self.searchAlgo == "NSGA2":
+            print("NSGA-II")
+            search = NSGA2(
+                pop_size=10,
+                sampling=get_sampling("bin_random"),
+                crossover=get_crossover("bin_ux"),
+                mutation=get_mutation("bin_bitflip"),
+                eliminate_duplicates=True
+            )
+        else:
+            raise "Search algorithm " + self.searchAlgo + " not implemented"
+
+        res = minimize(vectorized_problem,
+                       search,
+                       termination,
+                       seed=1,
+                       save_history=True,
+                       verbose=True)
+
+        print("Number of Nodes, (1-Delta BNI value)")
+        print(res.F)  # final fitness
+        return res
 
 
 if __name__ == '__main__':
-    network = io.loadmat('resources\\net.mat')  # TODO try with much smaller network to speed things up, or reduce N_N value?
-    net = network['net']
-    # compute the reference coupling value, for which BNI = 0.5
-    TIMESTEPS = 40000
-    ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, TIMESTEPS)
-    vectorized_problem = MyProblem(len(net), ref_coupling, net, TIMESTEPS)
-    termination = get_termination("n_gen", 100)
-    moeadalgo = MOEAD(
-        get_reference_directions("energy", 2, 10),
-        pop_size=10,
-        sampling=get_sampling("bin_random"),
-        crossover=get_crossover("bin_ux"),
-        mutation=get_mutation("bin_bitflip"),
-        eliminate_duplicates=True
-    )
 
-    nsgaalgo = NSGA2(
-        pop_size=10,
-        sampling=get_sampling("bin_random"),
-        crossover=get_crossover("bin_ux"),
-        mutation=get_mutation("bin_bitflip"),
-        eliminate_duplicates=True
-    )
-
-
-    res = minimize(vectorized_problem,
-                   nsgaalgo,
-                   termination,
-                   seed=1,
-                   save_history=True,
-                   verbose=True)
-    print("NSGA-II")
-    print("Number of Nodes, (1-Delta BNI value)")
-    print(res.F)  # final fitness
-    print("===================================")
-    res = minimize(vectorized_problem,
-                   moeadalgo,
-                   termination,
-                   seed=1,
-                   save_history=True,
-                   verbose=True)
-
-    print("===================================")
-    print("MOEAD")
-    print("Number of Nodes, (1-Delta BNI value)")
-    print(res.F)  # final fitness
+    sn = SearchNetwork("NSGA2")
+    sn.search()
