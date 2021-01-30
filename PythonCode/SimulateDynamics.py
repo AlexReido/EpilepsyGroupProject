@@ -36,6 +36,9 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
 
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
+# class DynamicsSimulator:
+#
+#     def __init__(self)
 
 def theta_model_p(net, w, nodes_resected, t=4000000):
     """
@@ -59,7 +62,9 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
 
     # Compute time series
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
+    # 95 % of time
     rand_i_sig = i_sig * np.random.randn(nodes, t)
+    # print(rand_i_sig.shape)
     #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
     x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
