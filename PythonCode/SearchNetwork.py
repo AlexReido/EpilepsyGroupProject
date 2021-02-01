@@ -229,7 +229,7 @@ if __name__ == '__main__':
     # ref_dirs = get_reference_directions("das-dennis", 2, n_partitions=8)
     #
     # get_visualization("scatter").add(ref_dirs).show()
-    sn = SearchNetwork("MOEAD")
+    sn = SearchNetwork("NSGA2")
     res = sn.search(30, 15)
     print("Nodes")
     for nlist in res.X:

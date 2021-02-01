@@ -64,8 +64,8 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
     # 95 % of time
     rand_i_sig = i_sig * np.random.randn(nodes, t)
-    # print(rand_i_sig.shape)
-    #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
+    print(rand_i_sig.shape)
+    #rand_i_sig = i_sig * r andn2(t, nodes).transpose()  # transpose to give same values as matlab
 
     x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
 

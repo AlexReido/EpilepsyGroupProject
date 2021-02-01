@@ -6,7 +6,7 @@ import requests
 import time
 import bct
 
-
+# TODO use Test client from https://fastapi.tiangolo.com/tutorial/testing/
 class TestGenerate(unittest.TestCase):
     def setUp(self):
         self.proc = Process(target=uvicorn.run,
