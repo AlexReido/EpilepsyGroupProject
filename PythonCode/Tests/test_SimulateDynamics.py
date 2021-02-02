@@ -2,8 +2,11 @@ import unittest
 from random import randint
 
 import numpy as np
+from numba import jit
 from scipy import io
 from scipy.special import erfinv
+
+import CONSTANTS
 import PythonCode.SimulateDynamics as SD
 from Tests import TEST_CONSTANTS
 
@@ -19,6 +22,11 @@ def randn2(*args, **kwargs):
     '''
     uniform = np.random.rand(*args, **kwargs)
     return np.sqrt(2) * erfinv(2 * uniform - 1)
+
+
+@jit(nopython=True, nogil=True, cache=True, fastmath=True)
+def seed_numba(seed):
+    np.random.seed(seed)
 
 
 class TestSimulateDynamics(unittest.TestCase):
@@ -37,8 +45,7 @@ class TestSimulateDynamics(unittest.TestCase):
         num_nodes_resected = 0  # test for BNI of whole network
         t = TEST_CONSTANTS.TIME_STEPS
         bni = SD.theta_model_p(self.network, w, num_nodes_resected, t)
-        #self.assertEqual(bni, 0.00013736016949152544)  # when using randn2
-        self.assertEqual(TEST_CONSTANTS.BNI_RANDN, bni)  # when using np.random.randn
+        self.assertEqual(TEST_CONSTANTS.BNI_RANDN_NUMBA, bni)
         # TODO test with different w values and nodes resected values
 
     def test_bni_find(self):
