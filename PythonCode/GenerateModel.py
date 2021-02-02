@@ -1,26 +1,85 @@
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 import bct
+import numpy as np
+import matlab.engine
+from numpy import inf
 app = FastAPI()
+
+
+def symmetrize(a):
+    """
+    Return a symmetrized version of NumPy array a.
+
+    Values 0 are replaced by the array value at the symmetric
+    position (with respect to the diagonal), i.e. if a_ij = 0,
+    then the returned array a' is such that a'_ij = a_ji.
+
+    Diagonal values are left untouched.
+
+    a -- square NumPy array, such that a_ij = 0 or a_ji = 0,
+    for i != j.
+    """
+    return a + a.T - np.diag(a.diagonal())
+
 
 def getStructuralnetwork(k, m, structure):
     if structure == "random":
-        return bct.makerandCIJ_und(k, m)
+        return symmetrize(bct.makerandCIJ_und(k, m))
     elif structure == "lattice":
         return bct.makeringlatticeCIJ(k, m)
+    elif structure == "toeplitz":
+        # TODO check on toeplitz edges as too high fails e.g. 10 nodes with 60 edges fails
+        return bct.maketoeplitzCIJ(k, m, 1.5).astype(float)
     elif structure == "smallword":
-        return None#TODO small world
+        return True  # TODO small world
     else:
-        raise ValueError("Network type" + type + "not supported")
+        raise ValueError("Network type: " + type + "not supported")
 
+
+def postProcessing(net):
+    # values inversely proportional to distance
+    net = np.divide(0.01, net)
+    # infinite distance set to value zero as no connection between nodes
+    net[net == inf] = 0
+    # Add noise to matrix
+    noise = np.random.normal(0.002, 0.001, len(net))
+    net = net - noise
+    net[net < 0] = 0
+    return net
 
 
 @app.get("/model/artificial/")
 async def generateNetwork(nodes: int = 20, edges: int = 100, structure: str = "random"):
     # weighted undirected network
     model = getStructuralnetwork(nodes, edges, structure)
+    # functional = bct.motif3funct_bin(model)
+    distance = bct.distance_wei_floyd(model, 'log')
+    # print("ditancee:")
+    # print(type(distance))
+    # print(distance)
+    # print("first")
+    print(distance[2])
+    print(model)
+    max = np.amax(distance)
+    # print(max)
+    # transform = lambda x: x/max
+    func = np.divide(distance, max)
+    func = np.around(func, 3)
+    # print(func)
+    # eng = matlab.engine.start_matlab()
+    # print(type(model))
+    # print(type(func))
+    # print(type(distance))
+    # # SC FC ED pred_var model
+    predvar = ['ED']  # ,'SPLwei_log','SI','T']
+    # predvar = matlab.double(predvar)
+    # bct.z
+    # res = eng.predict_fc(matlab.double(model.tolist()), matlab.double(func.tolist()),
+    #                      matlab.double(distance[2].tolist()), predvar, nargout=5)
+    # print(res)
     # functionalConnectivity = bct.p
-    print(type(model))
-    listmodel = model.tolist()
-    return listmodel
-
+    # print(functional)
+    # print(type(model))
+    listmodel = func.tolist()
+    return listmodel[2]
