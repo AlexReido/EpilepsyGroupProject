@@ -1,4 +1,4 @@
-# Group Epilepsy sugery progect
+# Group Epilepsy sugery project
 
 This project aims to aid in epilepsy surgery planning specifically in locating potential resection which cause the maximum reduction in network ictogenicity.
 
