@@ -5,7 +5,7 @@ from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
 from Tests import TEST_CONSTANTS
-from Tests.test_SimulateDynamics import randn2
+# from Tests.test_SimulateDynamics import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)

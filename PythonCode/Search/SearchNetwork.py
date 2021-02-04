@@ -3,10 +3,7 @@ import random
 import numpy as np
 from pymoo.algorithms.moead import MOEAD
 from pymoo.model.crossover import Crossover
-from pymoo.operators.crossover.util import crossover_mask
-from pymoo.operators.sampling.random_sampling import BinaryRandomSampling
-from pymoo.operators.mutation.bitflip_mutation import BinaryBitflipMutation
-from pymoo.operators.crossover.uniform_crossover import UniformCrossover
+
 from scipy import io
 from SimulateDynamics import bni_find, fitness_function
 from pymoo.model.problem import Problem
@@ -58,7 +55,10 @@ def main():  # TODO is this needed? (has different timestep variable).
     # for count_runs in range(CONSTANTS.num_GA_runs):
     # optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
 
-
+from pymoo.operators.crossover.util import crossover_mask
+from pymoo.operators.sampling.random_sampling import BinaryRandomSampling
+from pymoo.operators.mutation.bitflip_mutation import BinaryBitflipMutation
+from pymoo.operators.crossover.uniform_crossover import UniformCrossover
 class BinaryRandomSamplingLimit(BinaryRandomSampling):
     def __init__(self, maxNodes) -> None:
         self.maxNodes = maxNodes
