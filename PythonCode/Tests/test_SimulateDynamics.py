@@ -4,7 +4,7 @@ from random import randint
 import numpy as np
 from scipy import io
 from scipy.special import erfinv
-import PythonCode.SimulateDynamics as SD
+import PythonCode.Search.SimulateDynamics as SD
 from Tests import TEST_CONSTANTS
 
 

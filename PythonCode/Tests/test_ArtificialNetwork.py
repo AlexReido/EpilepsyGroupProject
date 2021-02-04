@@ -1,5 +1,5 @@
 import unittest
-import PythonCode.GenerateModel as gm
+import PythonCode.GenerateArtificial.GenerateModel as gm
 import numpy as np
 # import test_Gener
 

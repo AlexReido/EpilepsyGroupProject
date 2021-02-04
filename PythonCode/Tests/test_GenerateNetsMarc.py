@@ -1,5 +1,5 @@
 import unittest
-import PythonCode.GenerateNetsMarc as GnM
+import PythonCode.GenerateArtificial.GenerateNetsMarc as GnM
 
 
 def find_average_degree(net):
