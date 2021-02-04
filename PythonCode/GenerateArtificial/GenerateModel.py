@@ -1,9 +1,12 @@
+import warnings
+
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 import bct
 import numpy as np
 import matlab.engine
 from numpy import inf
+
 app = FastAPI()
 
 
@@ -24,6 +27,13 @@ def symmetrize(a):
 
 
 def getStructuralnetwork(k, m, structure):
+    """
+    Generates a structural network based on the structure provided using the bct toolbox
+    :param k: number of nodes
+    :param m: number of edges
+    :param structure:
+    :return: the structural adjacency matrix where an edge between nodes is denoted with a 1 and no edge 0
+    """
     if structure == "random":
         return symmetrize(bct.makerandCIJ_und(k, m))
     elif structure == "lattice":
@@ -39,13 +49,25 @@ def getStructuralnetwork(k, m, structure):
 
 def postProcessing(net):
     # values inversely proportional to distance
-    net = np.divide(0.01, net)
+    # the divide by zero produces a warning but is dealt with so we ignore them
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        net = np.divide(0.01, net)
     # infinite distance set to value zero as no connection between nodes
     net[net == inf] = 0
     # Add noise to matrix
     noise = np.random.normal(0.002, 0.001, len(net))
     net = net - noise
     net[net < 0] = 0
+    return net
+
+
+def get_artificial_net(k, m, structure):
+    net = getStructuralnetwork(k, m, structure)
+    # print(net)
+    d = bct.distance_wei_floyd(net)
+    net = d[0]
+    net = postProcessing(net)
     return net
 
 
