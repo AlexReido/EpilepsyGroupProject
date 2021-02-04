@@ -1,11 +1,8 @@
 from time import time, ctime
-
 import numpy as np
 from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
-from Tests import TEST_CONSTANTS
-# from Tests.test_SimulateDynamics import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
@@ -301,6 +298,9 @@ def fitness_function(x, w, net, t=4000000):
     return y
 
 if __name__ == "__main__":
+    # Final product will not include tests so best avoid importing from folder
+    from PythonCode.Tests import TEST_CONSTANTS
+
     mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
     network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
     bni = theta_model_p(network, 25, 0, 4000)
