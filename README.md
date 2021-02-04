@@ -2,6 +2,9 @@
 
 This project aims to aid in epilepsy surgery planning specifically in locating potential resection which cause the maximum reduction in network ictogenicity.
 
+I added the path to the local repo to a .pth file in C:\Users\user\anaconda3\Lib\site-packages
+In order to run files within subpackages from command line. 
+
 The backend of this project is broken down into three microservices:
 * Create model
 * Perform search
