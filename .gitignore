@@ -1,4 +1,6 @@
 ecog_data/
 .idea/workspace.xml
-PythonCode/__pycache/
-PythonCode/Tests/__pycache/
+PythonCode/__pycache__/
+PythonCode/Tests/__pycache__/
+PythonCode/GenerateArtificial/__pycache__/
+PythonCode/TyperCLI/__pycache__/
