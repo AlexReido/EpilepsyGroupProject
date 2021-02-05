@@ -1,5 +1,6 @@
 from time import time, ctime
 import numpy as np
+from numba import prange, cuda, float32
 from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
@@ -34,6 +35,7 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
 
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def theta_model_p(net, w, nodes_resected, t=4000000):
     """
     This function calculates bni.
@@ -63,8 +65,8 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
 
     # Compute bni
     for node in range(nodes):
-        aux = np.transpose(np.nonzero(x[:, node]))
-        if np.size(aux) == 0:
+        aux = np.flatnonzero(x[:, node])  # move outside loop
+        if len(aux) == 0:
             bni[node, 0] = 0
         else:
             seizure_index = np.zeros((len(aux), 2))  # 2 is a dimension for new array
@@ -77,7 +79,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
                     seizure_index[k, 0] = aux[i]
 
             seizure_index[k, 1] = aux[-1]
-            seizure_index = np.delete(seizure_index, np.s_[k + 1::], 0)
+            seizure_index = seizure_index[:k+1:]
             time_seizure = 0
             for i in range(seizure_index.shape[0]):
                 time_seizure = time_seizure + seizure_index[i, 1] - seizure_index[i, 0] + 1
@@ -196,7 +198,7 @@ def bni_find(net, t=4000000):
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
             #  TODO error in reference implementation? w above is redundant
-            w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
+            # w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
 
         if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
             z = False
