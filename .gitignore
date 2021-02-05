@@ -1,6 +1,13 @@
 ecog_data/
 .idea/workspace.xml
+<<<<<<< Updated upstream
 PythonCode/__pycache__/
 PythonCode/Tests/__pycache__/
 PythonCode/GenerateArtificial/__pycache__/
 PythonCode/TyperCLI/__pycache__/
+=======
+PythonCode/__pycache/
+PythonCode/Tests/__pycache/
+.nbi
+.nbc
+>>>>>>> Stashed changes
