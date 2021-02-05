@@ -1,7 +1,6 @@
-from GenerateArtificial import GenerateModel
+from PythonCode.GenerateArtificial import GenerateModel
 import bct
-
-from Search.SearchNetwork import SearchNetwork
+from PythonCode.Search.SearchNetwork import SearchNetwork
 
 
 def getnetwork(type):
