@@ -1,8 +1,7 @@
-import GenerateModel
+from GenerateArtificial import GenerateModel
 import bct
-import numpy as np
 
-from SearchNetwork import SearchNetwork
+from Search.SearchNetwork import SearchNetwork
 
 
 def getnetwork(type):
