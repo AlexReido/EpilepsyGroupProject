@@ -6,7 +6,6 @@ from numba import jit
 from scipy import io
 from scipy.special import erfinv
 
-import CONSTANTS
 import PythonCode.SimulateDynamics as SD
 from Tests import TEST_CONSTANTS
 

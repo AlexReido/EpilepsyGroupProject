@@ -8,7 +8,7 @@
       <excludeFolder url="file://$MODULE_DIR$/PythonCode/Tests/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/ecog_data" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (base)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (EpilepsyGroupProject)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
