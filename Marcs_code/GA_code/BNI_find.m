@@ -50,7 +50,7 @@ w_save=zeros(n_max,1);
 while(z)
     it=it+1;
     for noise=1:n_n
-        BNI(:,noise,it)=theta_model_P(double(net),w,num_nodes_resected);
+        BNI(:,noise,it)=theta_model_P_mex(double(net),w,num_nodes_resected);
     end
     w_save(it)=w;
     bni_aux1=squeeze(mean(mean(BNI(:,:,it)),2));

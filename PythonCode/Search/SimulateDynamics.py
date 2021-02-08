@@ -101,7 +101,6 @@ def ref_bni(w, bni, ref):
     if bni[ind] < ref:
         ind1 = ind
         bni_aux = np.copy(bni)
-        # bni_aux[bni < ref] = 0  # not supported by numba, for loop used instead
 
         for i in range(len(bni)):
             if bni[i] < ref:
@@ -111,7 +110,6 @@ def ref_bni(w, bni, ref):
     else:
         ind2 = ind
         bni_aux = np.copy(bni)
-        # bni_aux[bni > ref] = 0  # not supported by numba, for loop used instead
 
         for i in range(len(bni)):
             if bni[i] > ref:
@@ -164,8 +162,8 @@ def bni_find(net, t=4000000):
             bni[:, noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
 
         w_save[it - 1] = w
-        bni_aux1 = np.mean(np.mean(np.squeeze(bni[:, :, it - 1]), keepdims=True, axis=0), keepdims=True, axis=1)
-        bni_aux2 = np.mean(np.mean(np.squeeze(bni[:, :, :it]), keepdims=True, axis=0), axis=1, keepdims=True)
+        bni_aux1 = np.mean(np.mean(bni[:, :, it-1], axis=0), axis=0, keepdims=True)
+        bni_aux2 = np.mean(np.mean(bni[:, :, :it], axis=0), axis=0, keepdims=True)
         print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
@@ -194,8 +192,8 @@ def bni_find(net, t=4000000):
                 x1 = 1
             if CONSTANTS.CRITERIA > CONSTANTS.BNI_REF - bni_aux1 > 0:
                 x2 = 1
-            bni_aux3 = np.squeeze(np.sort(bni_aux2))
-            index = np.squeeze(np.argsort(bni_aux2))
+            bni_aux3 = np.sort(bni_aux2)[0]
+            index = np.argsort(bni_aux2)[0, :]
             ind1 = np.nonzero(bni_aux3 < CONSTANTS.BNI_REF)[0][-1]
             ind2 = np.nonzero(bni_aux3 > CONSTANTS.BNI_REF)[0][0]
 
@@ -273,7 +271,6 @@ def fitness_function(x, w, net, t=4000000):
     :param w: coupling value for which BNI=0.5.
     :param net: The network adjacency matrix.
     :param t: The number of time steps.
-    :param seed: Controls the random distribution.
     :return: A matrix with with the fitness values. Its size is (population size) x2. Each row corresponds to a
              different individual and the two columns stand for the objective functions. The 1st column returns the sum
              of the resected nodes and the 2nd column gives the 1-DBNI values.
