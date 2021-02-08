@@ -88,6 +88,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     return np.mean(bni)
 
 
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def ref_bni(w, bni, ref):
     """
     This function calculates the weight w_ref at which BNI=ref.
@@ -96,25 +97,34 @@ def ref_bni(w, bni, ref):
     :param ref: The reference value of BNI to achieve.
     :returns w_ref: The coupling value for which BNI = 0.5.
     """
-    err = 0.00001
-    ind = np.argmin(abs(bni - ref))
+    ind = np.argmin(np.abs(bni - ref))
     if bni[ind] < ref:
         ind1 = ind
         bni_aux = np.copy(bni)
-        bni_aux[bni < ref] = 0
-        ind2 = np.argmin(abs(bni_aux - ref))
+        #bni_aux[bni < ref] = 0  # not supported by numba, for loop used instead
+
+        for i in range(len(bni)):
+            if bni[i] < ref:
+                bni_aux[i] = 0
+
+        ind2 = np.argmin(np.abs(bni_aux - ref))
     else:
         ind2 = ind
         bni_aux = np.copy(bni)
-        bni_aux[bni > ref] = 0
-        ind1 = np.argmin(abs(bni_aux - ref))
+        #bni_aux[bni > ref] = 0  # not supported by numba, for loop used instead
+
+        for i in range(len(bni)):
+            if bni[i] > ref:
+                bni_aux[i] = 0
+
+        ind1 = np.argmin(np.abs(bni_aux - ref))
 
     x1 = w[ind1]
     y1 = bni[ind1]
     x2 = w[ind2]
     y2 = bni[ind2]
 
-    if abs(x1 - x2) < err:
+    if np.abs(x1 - x2) < CONSTANTS.ERROR:
         w_ref = x1
     else:
         m = (y2 - y1) / (x2 - x1)
@@ -124,6 +134,7 @@ def ref_bni(w, bni, ref):
     return w_ref
 
 
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def bni_find(net, t=4000000):
     """
     Calculates the coupling value for which bni = 0.5.
@@ -196,9 +207,6 @@ def bni_find(net, t=4000000):
                 w = (CONSTANTS.BNI_REF + CONSTANTS.DISPLACEMENT - yy0) / slope
             else:
                 w = (CONSTANTS.BNI_REF - yy0) / slope
-
-            #  TODO error in reference implementation? w above is redundant
-            # w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
 
         if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
             z = False

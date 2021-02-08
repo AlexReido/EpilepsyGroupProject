@@ -43,23 +43,23 @@ class TestSimulateDynamics(unittest.TestCase):
         w = TEST_CONSTANTS.GLOBAL_COUPLING
         num_nodes_resected = 0  # test for BNI of whole network
         t = TEST_CONSTANTS.TIME_STEPS
-        bni = PythonCode.theta_model_p(self.network, w, num_nodes_resected, t)
+        bni = PythonCode.Search.SimulateDynamics.theta_model_p(self.network, w, num_nodes_resected, t)
         self.assertEqual(TEST_CONSTANTS.BNI_RANDN_NUMBA, bni)
         # TODO test with different w values and nodes resected values
 
     def test_bni_find(self):
-        t = TEST_CONSTANTS.FAST_TIME_STEPS
-        ref_coupling, BNI_test_values, coupling_test_values = SD.bni_find(self.network, t)
+        t = TEST_CONSTANTS.TIME_STEPS
+        ref_coupling, BNI_test_values, coupling_test_values = PythonCode.Search.SimulateDynamics.bni_find(self.network, t)
         self.assertEqual(TEST_CONSTANTS.REF_COUPLING, ref_coupling[0])
         # TODO failing
 
     def test_ref_bni(self):
-        w = np.array([[25], [50], [100], [200], [225], [237.5], [250], [300]], dtype=object)
-        bni = np.array([[0], [0], [0], [0.012], [0.3228178], [0.48294068], [0.50860593], [0.62369492], [0.74772881]],
-                       dtype=object)
+        w = np.array([[25], [50], [100], [200], [225], [237.5], [250], [300]], dtype=np.float64)
+        bni = np.array([[0], [0], [0], [0.012], [0.3228178], [0.48294068], [0.50860593], [0.62369492], [0.74772881]], dtype=np.float64)
         ref = TEST_CONSTANTS.REFERENCE_BNI
-        w_ref = SD.ref_bni(w, bni, ref)
+        w_ref = PythonCode.Search.SimulateDynamics.ref_bni(w, bni, ref)
         self.assertEqual(w_ref[0], TEST_CONSTANTS.W_REF)
+        # TODO needs test for when bni < ref
 
     def test_fitness_function(self):
         t = 4000
