@@ -7,7 +7,7 @@ from scipy import io
 from scipy.special import erfinv
 
 import PythonCode.Search.SimulateDynamics
-import TEST_CONSTANTS
+import PythonCode.Tests.TEST_CONSTANTS
 
 
 def generate_fitness_matrix(population_size, nodes):

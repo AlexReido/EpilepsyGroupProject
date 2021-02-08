@@ -7,6 +7,7 @@ from scipy import io
 from PythonCode.Search.SimulateDynamics import bni_find
 from PythonCode.Search.DynamicsProblem import DynamicsProblem
 from PythonCode.Search.Operators import *
+
 def main():  # TODO is this needed? (has different timestep variable).
     network = io.loadmat('../resources/net.mat')
     net = network['net']
@@ -83,8 +84,8 @@ class SearchNetwork:
                        save_history=True,
                        verbose=True)
 
-        # print("Number of Nodes, (1-Delta BNI value)")
-        # print(res.F)  # final fitness
+        print("Number of Nodes, (1-Delta BNI value)")
+        print(res.F)  # final fitness
         return callback
 
 
@@ -92,12 +93,14 @@ if __name__ == '__main__':
     # ref_dirs = get_reference_directions("das-dennis", 2, n_partitions=8)
     #
     # get_visualization("scatter").add(ref_dirs).show()
-    sn = SearchNetwork("NSGA2")
+    # TODO print time
+    sn = SearchNetwork("NSGA2", timesteps=4000000)
     res = sn.search(30, 15)
     for i, generation in enumerate(res.opt):
         print("Generation: ", str(i))
         for ind in generation:
             print(ind[0], ind[1])
+    # TODO print time
     # print("Nodes")
     # for nlist in res.X:
     #     node_indexes = [i for i, x in enumerate(nlist) if x]

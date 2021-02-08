@@ -35,7 +35,7 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
 
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+#@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def theta_model_p(net, w, nodes_resected, t=4000000):
     """
     This function calculates bni.
@@ -198,7 +198,7 @@ def bni_find(net, t=4000000):
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
             #  TODO error in reference implementation? w above is redundant
-            # w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
+            #w = (w_save[index[ind1]] + w_save[index[ind2]])[0] / 2
 
         if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
             z = False
@@ -303,6 +303,8 @@ if __name__ == "__main__":
     # Final product will not include tests so best avoid importing from folder
     from PythonCode.Tests import TEST_CONSTANTS
 
+    np.random.seed(1337)
     mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
     network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
-    bni = theta_model_p(network, 25, 0, 4000)
+    bni = theta_model_p(network, 25, 0, 4000000)
+    print(bni)
