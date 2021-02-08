@@ -30,7 +30,7 @@ def numba_compute_theta(t, wnet, nodes, rand_i_sig):
         ictogenicity = rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
             theta[time - 1, :] - theta[0, :])))
         theta[time, :] = theta[time - 1, :] + (
-                    CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
+                CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
 
     return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
 
@@ -59,7 +59,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     # Compute time series
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
     rand_i_sig = (i_sig * np.random.randn(nodes, t)) + CONSTANTS.DIST
-    #rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
+    # rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
     x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
 
@@ -79,7 +79,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
                     seizure_index[k, 0] = aux[i]
 
             seizure_index[k, 1] = aux[-1]
-            seizure_index = seizure_index[:k+1:]
+            seizure_index = seizure_index[:k + 1:]
             time_seizure = 0
             for i in range(seizure_index.shape[0]):
                 time_seizure = time_seizure + seizure_index[i, 1] - seizure_index[i, 0] + 1
@@ -101,7 +101,7 @@ def ref_bni(w, bni, ref):
     if bni[ind] < ref:
         ind1 = ind
         bni_aux = np.copy(bni)
-        #bni_aux[bni < ref] = 0  # not supported by numba, for loop used instead
+        # bni_aux[bni < ref] = 0  # not supported by numba, for loop used instead
 
         for i in range(len(bni)):
             if bni[i] < ref:
@@ -111,7 +111,7 @@ def ref_bni(w, bni, ref):
     else:
         ind2 = ind
         bni_aux = np.copy(bni)
-        #bni_aux[bni > ref] = 0  # not supported by numba, for loop used instead
+        # bni_aux[bni > ref] = 0  # not supported by numba, for loop used instead
 
         for i in range(len(bni)):
             if bni[i] > ref:
@@ -134,7 +134,7 @@ def ref_bni(w, bni, ref):
     return w_ref
 
 
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+# @nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def bni_find(net, t=4000000):
     """
     Calculates the coupling value for which bni = 0.5.
@@ -227,6 +227,7 @@ def bni_find(net, t=4000000):
     return ref_coupling, bni_test_values, coupling_test_values
 
 
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     """
     DeltaBNI calculation for the given network.
@@ -243,15 +244,14 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     delta_bni = np.ones((1, CONSTANTS.N_N))
 
     # Finds the position of the nodes that will be resected
-    resected_position = np.where(individ)
+    resected_position = np.where(individ == 0)
 
     # Remove rows for the resected nodes
-    net = np.delete(net, resected_position[0], axis=0)
+    net = net[:, resected_position[0]]  # deletes 31 nodes, not 29
 
     # Remove columns from the resected nodes
-    net = np.delete(net, resected_position[0], axis=1)
+    net = net[resected_position[0], :]
 
-    # TODO multi thread this loop
     # Calculate delta_bni for different noise runs
     for noise in range(CONSTANTS.N_N):
         delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t)) / 0.5
@@ -262,6 +262,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     return delta_bni
 
 
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def fitness_function(x, w, net, t=4000000):
     """
     Multi-objective fitness function for the optimisation of the removal combination of an epileptic network.
@@ -306,6 +307,7 @@ def fitness_function(x, w, net, t=4000000):
     y[:, 0] = y1
     y[:, 1] = y2
     return y
+
 
 if __name__ == "__main__":
     # Final product will not include tests so best avoid importing from folder

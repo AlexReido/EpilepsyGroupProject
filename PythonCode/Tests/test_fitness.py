@@ -48,7 +48,7 @@ class TestSimulateDynamics(unittest.TestCase):
         # TODO test with different w values and nodes resected values
 
     def test_bni_find(self):
-        t = TEST_CONSTANTS.TIME_STEPS
+        t = TEST_CONSTANTS.FAST_TIME_STEPS
         ref_coupling, BNI_test_values, coupling_test_values = PythonCode.Search.SimulateDynamics.bni_find(self.network, t)
         self.assertEqual(TEST_CONSTANTS.REF_COUPLING, ref_coupling[0])
         # TODO failing
@@ -66,20 +66,21 @@ class TestSimulateDynamics(unittest.TestCase):
         w = 245.8085685983158
         contents = io.loadmat('..\\resources\\x.mat')
         x = contents['r']
-        y = SD.fitness_function(x, w, self.network, t, self.seed)
-        self.assertEqual(len(y), len(self.network))
+        y = PythonCode.Search.SimulateDynamics.fitness_function(x, w, self.network, t)
+        self.assertEqual(200, len(y))
         # TODO devise a better test
         # possible accuracy error when comparing to matlab
         self.assertEqual(True, False)  # deliberate failure to highlight lack of testing here
 
-
-"""
     def test_optimrun(self):
         self.assertEqual(True, False)
 
     def test_delta_bni_r_dir(self):
+        num_resect_nodes = 0
+        individ = np.zeros((len(self.network), 1))
+        w = 250
+        PythonCode.Search.SimulateDynamics.delta_bni_r_dir(num_resect_nodes, individ, w, self.network)
         self.assertEqual(True, False)
-"""
 
 if __name__ == '__main__':
     unittest.main()
