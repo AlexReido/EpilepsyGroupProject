@@ -7,21 +7,23 @@ from scipy import io
 from PythonCode.Search.SimulateDynamics import bni_find
 from PythonCode.Search.DynamicsProblem import DynamicsProblem
 from PythonCode.Search.Operators import *
-def main():  # TODO is this needed? (has different timestep variable).
-    network = io.loadmat('../resources/net.mat')
-    net = network['net']
 
-    # first check if the network has ones in its main diagonal (if yes we delete them)
-    length_net = len(network)
-    if (np.diag(network) == np.ones((length_net, 1))).all:
-        network = network - np.eye(length_net)
 
-    # compute the reference coupling value, for which BNI = 0.5
-    ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, t=4000)
-
-    # apply the GA
-    # for count_runs in range(CONSTANTS.num_GA_runs):
-    # optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
+# def main():  # TODO is this needed? (has different timestep variable).
+#     network = io.loadmat('../resources/net.mat')
+#     net = network['net']
+#
+#     # first check if the network has ones in its main diagonal (if yes we delete them)
+#     length_net = len(network)
+#     if (np.diag(network) == np.ones((length_net, 1))).all:
+#         network = network - np.eye(length_net)
+#
+#     # compute the reference coupling value, for which BNI = 0.5
+#     ref_coupling, BNI_test_values, coupling_test_values = bni_find(net, t=4000)
+#
+#     # apply the GA
+#     # for count_runs in range(CONSTANTS.num_GA_runs):
+#     # optimrun(CONSTANTS.num_gen, CONSTANTS.pop_size, count_runs, network, ref_coupling)
 
 
 class SearchNetwork:
@@ -38,13 +40,17 @@ class SearchNetwork:
         else:
             self.net = network
 
-    def search(self, nGen=100, max_nodes=20):
+    def search(self, nGen=100, max_nodes=20, swp=None):
+        # first check if the network has ones in its main diagonal (if yes we delete them)
+        length_net = len(self.net)
+        if (np.diag(self.net) == np.ones((length_net, 1))).all:
+            self.net = self.net - np.eye(length_net)
         # compute the reference coupling value, for which BNI = 0.5
         print("Finding reference coupling:")
         ref_coupling, BNI_test_values, coupling_test_values = bni_find(self.net, self.timesteps)
         vectorized_problem = DynamicsProblem(len(self.net), ref_coupling, self.net, self.timesteps)
         termination = get_termination("n_gen", nGen)
-        callback = MyCallback()
+        callback = MyCallback(swp)
         # sampling = get_sampling("bin_random"),
         # crossover = get_crossover("bin_ux"),
         # mutation = get_mutation("bin_bitflip"),
@@ -81,11 +87,11 @@ class SearchNetwork:
                        callback=callback,
                        seed=1,
                        save_history=True,
-                       verbose=True)
+                       verbose=False)
 
         # print("Number of Nodes, (1-Delta BNI value)")
         # print(res.F)  # final fitness
-        return callback
+        return res
 
 
 if __name__ == '__main__':

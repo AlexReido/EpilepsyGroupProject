@@ -109,14 +109,17 @@ class BinaryBitflipMutationLimit(Mutation):
 
 class MyCallback(Callback):
 
-    def __init__(self) -> None:
+    def __init__(self, swp) -> None:
         super().__init__()
         self.n_evals = []
         self.opt = []
+        self.swp=swp
 
     def notify(self, algorithm):
-        print("RUNNING")
+        if self.swp != None:
+            self.swp.nextgeneration()
         self.n_evals.append(algorithm.evaluator.n_eval)
+        # print(len(self.n_evals))
         results = []
         for ind in algorithm.opt:
             results.append(ind.F)
