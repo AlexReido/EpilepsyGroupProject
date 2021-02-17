@@ -44,7 +44,12 @@ def main(
 
     results = swp.dosearch(searcher, gen, n)
     typer.echo(results.F)
-    typer.echo(results.X)
+    #typer.echo(results.X)
+
+    print("Nodes")
+    for nlist in results.X:
+         node_indexes = [i for i, x in enumerate(nlist) if x]
+         print(node_indexes)
 
 
 if __name__ == "__main__":

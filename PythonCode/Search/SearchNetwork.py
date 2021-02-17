@@ -105,12 +105,12 @@ if __name__ == '__main__':
     # TODO print time
     sn = SearchNetwork("NSGA2", timesteps=4000000)
     res = sn.search(30, 15)
-    for i, generation in enumerate(res.opt):
-        print("Generation: ", str(i))
-        for ind in generation:
-            print(ind[0], ind[1])
+    #for i, generation in enumerate(res.opt):
+        #print("Generation: ", str(i))
+        #for ind in generation:
+            #print(ind[0], ind[1])
     # TODO print time
-    # print("Nodes")
-    # for nlist in res.X:
-    #     node_indexes = [i for i, x in enumerate(nlist) if x]
-    #     print(node_indexes)
+    print("Nodes")
+    for nlist in res.X:
+         node_indexes = [i for i, x in enumerate(nlist) if x]
+         print(node_indexes)
