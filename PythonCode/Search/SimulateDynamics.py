@@ -1,41 +1,13 @@
-from time import time, ctime
 import numpy as np
-from numba import prange, cuda, float32
+from numba import prange
 from scipy import io
 import numba as nb
 import PythonCode.CONSTANTS as CONSTANTS
+from PythonCode.Tests import TEST_CONSTANTS
+from PythonCode.Tests.helper_test_functions import randn2
 
 
 @nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
-def numba_compute_theta(t, wnet, nodes, rand_i_sig):
-    """
-    Compute the time series using the Euler-Maruyama method.
-    This method uses the numba library for JIT.
-
-    :param rand_i_sig:
-    :param t: time steps.
-    :param wnet: normalisation of coupling.
-    :param dt: time step for the integration.
-    :param nodes: number of nodes in the network.
-    :param threshold: threshold value for BNI.
-    :param seed: seed to control random number distribution.
-    :return: time series of the network.
-    """
-
-    theta = np.empty((t, nodes, 1))
-    theta[0, :] = -np.real(np.arccos(np.divide(1 + CONSTANTS.DIST, 1 - CONSTANTS.DIST)))  # stable point if i_0 < 0
-
-    for time in np.arange(1, t):
-        cos_theta_old = np.cos(theta[time - 1, :])
-        ictogenicity = rand_i_sig[:, time - 1:time] + (wnet @ (1 - np.cos(
-            theta[time - 1, :] - theta[0, :])))
-        theta[time, :] = theta[time - 1, :] + (
-                CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
-
-    return (1 - np.cos(theta - theta[0, :]))[:, :, 0] * 0.5 > CONSTANTS.THRESHOLD  # squeeze not supported by numba
-
-
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
 def theta_model_p(net, w, nodes_resected, t=4000000):
     """
     This function calculates bni.
@@ -58,10 +30,18 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
 
     # Compute time series
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
-    rand_i_sig = (i_sig * np.random.randn(nodes, t)) + CONSTANTS.DIST
-    # rand_i_sig = i_sig * randn2(t, nodes).transpose()  # transpose to give same values as matlab
 
-    x = numba_compute_theta(t, wnet, nodes, rand_i_sig)  # python with numba library (fastest)
+    x = np.full((t, nodes), False)
+    theta_start = np.empty((1, nodes))
+    theta_start[:] = -np.real(np.arccos(np.divide(1 + CONSTANTS.DIST, 1 - CONSTANTS.DIST)))
+    theta_old = theta_start
+
+    for time in range(1, t):
+        cos_theta_old = np.cos(theta_old)
+        ictogenicity = (i_sig * np.random.randn(1, nodes)) + CONSTANTS.DIST + ((1 - np.cos(
+            theta_old - theta_start)) @ wnet)
+        theta_old = theta_old + (CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
+        x[time, :] = 0.5 * (1 - np.cos(theta_old - theta_start)) > CONSTANTS.THRESHOLD
 
     # Compute bni
     for node in range(nodes):
@@ -132,14 +112,13 @@ def ref_bni(w, bni, ref):
     return w_ref
 
 
-# @nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+# DOES NOT REQUIRE NUMBA
 def bni_find(net, t=4000000):
     """
     Calculates the coupling value for which bni = 0.5.
 
     :param net: The (NxN) functional network. net(i,j) should denote the connection from node i to node j.
-    :param t: time steps
-    :param seed: seed to control random number distribution
+    :param t: The number of timesteps to use in compute_theta.
     :returns w_ref: The coupling value for which bni = 0.5.
     :returns BNI_test_values: The bni values that calculated while we were searching for the ref_coupling.
     :returns w_safe: The coupling values that correspond to the BNI_test_values.
@@ -147,31 +126,33 @@ def bni_find(net, t=4000000):
 
     nodes = len(net)  # number of nodes
     w = 25  # initial guess of coupling
+    # TODO initial coupling guess changing based on the network size would speed things up a lot.
 
     # main calculations
     it = 0
-    z = True
-    x1 = 0
-    x2 = 0
-    bni = np.zeros((nodes, CONSTANTS.N_N, CONSTANTS.N_MAX))
-    w_save = np.zeros((CONSTANTS.N_MAX, 1))
+    x1 = False
+    x2 = False
+    bni = np.empty((CONSTANTS.N_N, CONSTANTS.N_MAX))
+    w_save = np.empty((CONSTANTS.N_MAX, 1))
 
-    while z:
+    while not ((x1 and x2) or it == CONSTANTS.N_MAX):
         it += 1
+        w = np.ravel(w)[0]
+
         for noise in range(CONSTANTS.N_N):
-            bni[:, noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
+            bni[noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
 
         w_save[it - 1] = w
-        bni_aux1 = np.mean(np.mean(bni[:, :, it-1], axis=0), axis=0, keepdims=True)
-        bni_aux2 = np.mean(np.mean(bni[:, :, :it], axis=0), axis=0, keepdims=True)
+        bni_aux1 = np.mean(bni[:, it-1])  # find the mean of the latest row
+        bni_aux2 = np.mean(bni[:, :it], axis=0)
         print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
             # Lucky guess:
             if CONSTANTS.CRITERIA > bni_aux1 - CONSTANTS.BNI_REF > 0:
-                x1 = 1
+                x1 = True
             if CONSTANTS.CRITERIA > CONSTANTS.BNI_REF - bni_aux1 > 0:
-                x2 = 1
+                x2 = True
 
             if bni_aux1 < CONSTANTS.BNI_REF:
                 w *= 2
@@ -179,9 +160,9 @@ def bni_find(net, t=4000000):
                 w /= 2
         else:
             # 1st: Find a point above and below bni_ref
-            l1 = np.sum(bni_aux2 > CONSTANTS.BNI_REF)
-            l2 = np.sum(bni_aux2 < CONSTANTS.BNI_REF)
-            if (l1 * l2) == 0:
+            l1 = np.multiply(bni_aux2 > CONSTANTS.BNI_REF, 1)
+            l2 = np.multiply(bni_aux2 < CONSTANTS.BNI_REF, 1)
+            if np.sum(l1) * np.sum(l2) == 0:
                 if bni_aux1 < CONSTANTS.BNI_REF:
                     w *= 2
                 else:
@@ -189,40 +170,35 @@ def bni_find(net, t=4000000):
                 continue
             # 2nd: Fine tuning
             if CONSTANTS.CRITERIA > bni_aux1 - CONSTANTS.BNI_REF > 0:
-                x1 = 1
+                x1 = True
             if CONSTANTS.CRITERIA > CONSTANTS.BNI_REF - bni_aux1 > 0:
-                x2 = 1
-            bni_aux3 = np.sort(bni_aux2)[0]
-            index = np.argsort(bni_aux2)[0, :]
-            ind1 = np.nonzero(bni_aux3 < CONSTANTS.BNI_REF)[0][-1]
-            ind2 = np.nonzero(bni_aux3 > CONSTANTS.BNI_REF)[0][0]
+                x2 = True
+
+            bni_aux3 = np.sort(bni_aux2)
+            index = np.argsort(bni_aux2, axis=0)
+
+            ind1 = np.flatnonzero(bni_aux3 < CONSTANTS.BNI_REF)[-1]
+            ind2 = np.flatnonzero(bni_aux3 > CONSTANTS.BNI_REF)[0]
 
             slope = (bni_aux3[ind2] - bni_aux3[ind1]) / (w_save[index[ind2]] - w_save[index[ind1]])
             yy0 = bni_aux3[ind2] - slope * w_save[index[ind2]]
-            if x1 == 1:
+            if x1:
                 w = (CONSTANTS.BNI_REF - CONSTANTS.DISPLACEMENT - yy0) / slope
-            elif x2 == 1:
+            elif x2:
                 w = (CONSTANTS.BNI_REF + CONSTANTS.DISPLACEMENT - yy0) / slope
             else:
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
-        if x1 + x2 == 2 or it == CONSTANTS.N_MAX:
-            z = False
-
-    w_save = np.delete(w_save, np.s_[it:], 0)
-    bni = bni[:, :, :it]
+    w_save = w_save[:it]
+    bni = bni[:, :it]
 
     # calculate the exact coupling value for which bni=0.5
-    w = np.sort(w_save, axis=0)
+    w = np.sort(w_save)  # no optional argument with numba
     i_w = np.argsort(w_save, axis=0)
-    bni = np.squeeze(np.mean(np.mean(bni, keepdims=True, axis=0), keepdims=True, axis=1))
+    bni = np.mean(np.mean(bni, axis=0), axis=0)
     w_ref = ref_bni(w, bni[i_w], 0.5)
 
-    ref_coupling = w_ref
-    bni_test_values = bni
-    coupling_test_values = w_save
-
-    return ref_coupling, bni_test_values, coupling_test_values
+    return w_ref, bni, w_save
 
 
 @nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
@@ -290,7 +266,7 @@ def fitness_function(x, w, net, t=4000000):
 
     # TODO vectorise and multithread loop?
     # Calculate the fitness for each individual
-    for count_indiv in range(pop_size):
+    for count_indiv in prange(pop_size):
         individ = x[count_indiv, :]
 
         # 1st objective function : number of resections
@@ -307,9 +283,13 @@ def fitness_function(x, w, net, t=4000000):
 
 
 if __name__ == "__main__":
-    # Final product will not include tests so best avoid importing from folder
-    from PythonCode.Tests import TEST_CONSTANTS
-
+    t = TEST_CONSTANTS.TIME_STEPS
     mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
     network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
-    bni = theta_model_p(network, 25, 0, 4000)
+    np.random.seed(1337)
+    #noise = randn2(t, len(network))
+    w = 25
+    num_nodes_resected = 0  # test for BNI of whole network
+
+    bni = theta_model_p(network, w, num_nodes_resected, t)
+    print(bni)
