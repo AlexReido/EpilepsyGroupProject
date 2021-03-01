@@ -1,0 +1,160 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <script src="//unpkg.com/3d-force-graph"></script>
+  <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script>
+  <script src="/node_modules/three/build/three.js"></script>
+  <script src="/node_modules/JQuery/lib/node-jquery.js"></script>
+  <title>ESP</title>
+
+</head>
+<body>
+
+  <div class="parent">
+   <header class="pink section">Header</header>
+   <div class="left-side blue section" contenteditable>Left Sidebar</div>
+   <main id="3d-graph" class="section coral" contenteditable>
+     <!-- <div >
+       < <div style="position: absolute;"> -->
+     <!-- The text to be added, will be written here! :) -->
+     <!-- </div> --> -->
+   </main>
+   <div class="right-side yellow section" contenteditable>Right Sidebar</div>
+   <footer class="green section">Footer</footer>
+ </div>
+
+
+  <script type="module">
+
+    function getnet() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log("recieved network!");
+          var graphdata = JSON.parse(JSON.parse(this.responseText));
+          // console.log(graphdata)
+
+          // console.log(graphdata[0])
+          // console.log(graphdata[1])
+          // console.log(graphdata[2])
+          // console.log(graphdata[3])
+          // console.log(graphdata[4])
+          console.log(graphdata.nodes)
+          const selectedNodes = new Set();
+           // const highlightLinks = new Set();
+          let hoverNode = null;
+          const graph = ForceGraph3D()
+            (document.getElementById('3d-graph'))
+              // .nodeColor(node => 'rgb(255,0,111,1)')
+              .nodeColor(node =>selectedNodes.has(node) ? 'rgba(219,131,16,0.8)': 'rgb(255,0,111,0.8)')
+              .nodeOpacity(1)
+              .enableNodeDrag(false)
+              .linkColor(link => 'rgba(124,21,65,1)')
+              // link width is very slow
+              // .linkWidth(0.5)
+              .linkOpacity(1)
+              .width(1200)
+              .height(800)
+              .onNodeClick((node, event) => {
+                  if (event.ctrlKey || event.shiftKey || event.altKey) { // multi-selection
+                    selectedNodes.has(node) ? selectedNodes.delete(node) : selectedNodes.add(node);
+                  } else { // single-selection
+                    const untoggle = selectedNodes.has(node) && selectedNodes.size === 1;
+                    selectedNodes.clear();
+                    !untoggle && selectedNodes.add(node);
+                  }
+                  graph.nodeColor(graph.nodeColor()); // update color of selected nodes
+              })
+              .graphData(graphdata);
+          graph.renderer().setClearColor( 0x000000, 0 );
+          console.log(graph.backgroundColor());
+          graph.backgroundColor('#FFFFFF');
+          console.log(graph.backgroundColor());
+          console.log(graph.scene());
+          function updateHighlight() {
+            // trigger update of highlighted objects in scene
+            graph
+              .nodeColor(graph.nodeColor())
+              // .linkWidth(Graph.linkWidth())
+              // .linkDirectionalParticles(Graph.linkDirectionalParticles());
+          }
+        }
+      };
+      xhttp.open("GET", "http://127.0.0.1:5000", true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      xhttp.send();
+    }
+    getnet();
+    // TODO on reset button: Graph.zoomToFit(400))
+
+    // import * as THREE from '/node_modules/three/build/three.js';
+    // var ForceGraph3D = require('3d-force-graph');
+    // Random tree
+    // const GROUPS = 12;
+    // const N = 300;
+    // const gData = {
+    //   nodes: [...Array(N).keys()].map(i => ({ id: i, group:  Math.ceil(Math.random() * GROUPS)})),
+    //   links: [...Array(N).keys()]
+    //     .filter(id => id)
+    //     .map(id => ({
+    //       source: id,
+    //       target: Math.round(Math.random() * (id-1))
+    //     }))
+    // };
+    // var renderer = new THREE.WebGLRenderer( { alpha: true } );
+    // renderer.setClearColor( 0x000000, 0 );
+
+    // const graph = ForceGraph3D()
+    //   (document.getElementById('3d-graph'))
+    //     .nodeAutoColorBy('group')
+    //     .nodeOpacity(1)
+    //     .enableNodeDrag(false)
+    //     .linkColor('#00FF00')
+    //     // link width is very slow
+    //     // .linkWidth(0.5)
+    //     .linkOpacity(1)
+    //     .graphData(graphdata);
+    // graph.renderer().dispose();
+    // graph.renderer() = new THREE.WebGLRenderer( { alpha: true } );
+    // graph.renderer().setClearColor( 0x000000, 0 );
+    // // graph.renderer().clearColor();
+    // // graph.renderer().state.reset();
+    // // graph.renderer().setClearAlpha(1);
+    // // graph.renderer().clear(true, true, true);
+    // console.log(graph.backgroundColor());
+    // graph.backgroundColor('#FFFFFF');
+    // console.log(graph.backgroundColor());
+    // console.log(graph.scene());
+
+    // TODO add brain loadModel
+    //https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_obj.html
+    //https://mollermara.com/blog/brain-in-threejs/
+    //https://mollermara.com/static/threejs-brain/object-stuff.js
+    // import { OBJLoader } from 'three';
+    // let object;
+    // function loadModel() {
+  	// 	object.traverse( function ( child ) {
+    //
+  	// 		if ( child.isMesh ) child.material.map = texture;
+    //
+  	// 	} );
+    //
+  	// 	object.position.y = - 95;
+  	// 	graph.scene().add( object );
+    // }
+    //
+    // const manager = new THREE.LoadingManager( loadModel );
+    // const loader = new OBJLoader( manager );
+		// loader.load( 'freesurf.OBJ', function ( obj ) {
+    //
+		// 	object = obj;
+    //
+		// }, onProgress, onError );
+    //
+
+    // graph.scene().background = new THREE.Color( 0x000000 );
+  </script>
+</body>
+</html>
