@@ -55,7 +55,7 @@ net(:,resected_position) = [];
 %% Calculate DeltaBNI for different noise runs
 % Replace parfor with for to run the loop using one thread.
 parfor noise=1:n_n
-    DeltaBNI(1,noise)=(0.5-theta_model_P(net, w, num_resect_nodes))/0.5;
+    DeltaBNI(1,noise)=(0.5-theta_model_P_mex(net, w, num_resect_nodes))/0.5;
     %it also runs with (0.5-theta_model_P_mex(net,w, num_resect_nodes))/0.5; but it is much slower
 %     sprintf('nodesresected_%0.0f_noise_realiz%0.0f', num_resect_nodes, noise)
 end
