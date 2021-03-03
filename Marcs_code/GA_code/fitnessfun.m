@@ -39,6 +39,7 @@ function y = fitnessfun(x, w, net)
 % @copyright: Not specified
 
 %% Prepare support data structures
+datetime('now')
 
 %count the number of individuals
 pop_size = size(x,1);
@@ -70,6 +71,8 @@ end
 %% Set values to the return value
 y(:,1) = y1;
 y(:,2) = y2;
+
+datetime('now')
 
 end
 

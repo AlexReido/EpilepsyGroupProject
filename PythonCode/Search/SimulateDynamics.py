@@ -40,6 +40,8 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
         cos_theta_old = np.cos(theta_old)
         ictogenicity = (i_sig * np.random.randn(1, nodes)) + CONSTANTS.DIST + ((1 - np.cos(
             theta_old - theta_start)) @ wnet)
+        #ictogenicity = (i_sig * np.random.randn(nodes, 1).T) + CONSTANTS.DIST + ((1 - np.cos(
+            #theta_old - theta_start)) @ wnet)
         theta_old = theta_old + (CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
         x[time, :] = 0.5 * (1 - np.cos(theta_old - theta_start)) > CONSTANTS.THRESHOLD
 
@@ -68,7 +70,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     return np.mean(bni)
 
 
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+@nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
 def ref_bni(w, bni, ref):
     """
     This function calculates the weight w_ref at which BNI=ref.
@@ -112,10 +114,27 @@ def ref_bni(w, bni, ref):
     return w_ref
 
 
-# DOES NOT REQUIRE NUMBA
+@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+def run_theta_calc(bni, it, net, w, t):
+    """
+    Compute the BNI values for the given coupling value.
+
+    :param bni: The bni values for each coupling value guess.
+    :param it: The current iteration.
+    :param net: The functional network.
+    :param w: The current guess of the coupling value.
+    :param t: The number of timesteps.
+    :return: The BNI values for the given coupling value.
+    """
+    for noise in prange(CONSTANTS.N_N):
+        bni[it - 1, noise] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
+    return bni
+
+
 def bni_find(net, t=4000000):
     """
     Calculates the coupling value for which bni = 0.5.
+    Note: DOES NOT REQUIRE NUMBA
 
     :param net: The (NxN) functional network. net(i,j) should denote the connection from node i to node j.
     :param t: The number of timesteps to use in compute_theta.
@@ -126,25 +145,23 @@ def bni_find(net, t=4000000):
 
     nodes = len(net)  # number of nodes
     w = 25  # initial guess of coupling
-    # TODO initial coupling guess changing based on the network size would speed things up a lot.
 
     # main calculations
     it = 0
     x1 = False
     x2 = False
-    bni = np.empty((CONSTANTS.N_N, CONSTANTS.N_MAX))
-    w_save = np.empty((CONSTANTS.N_MAX, 1))
+    bni = np.zeros((CONSTANTS.N_MAX, CONSTANTS.N_N))
+    w_save = np.zeros((CONSTANTS.N_MAX, 1))
 
     while not ((x1 and x2) or it == CONSTANTS.N_MAX):
         it += 1
         w = np.ravel(w)[0]
 
-        for noise in range(CONSTANTS.N_N):
-            bni[noise, it - 1] = theta_model_p(net, w, CONSTANTS.NUM_NODES_RESECTED, t)
+        bni = run_theta_calc(bni, it, net, w, t)
 
         w_save[it - 1] = w
-        bni_aux1 = np.mean(bni[:, it-1])  # find the mean of the latest row
-        bni_aux2 = np.mean(bni[:, :it], axis=0)
+        bni_aux1 = np.mean(bni[it-1, :])  # find the mean of the latest row
+        bni_aux2 = np.asarray([np.mean(bni[i, :]) for i in range(it)])
         print("Iteration: ", it, " | bni = ", bni_aux1, " | w = ", w)
 
         if it == 1:
@@ -190,12 +207,12 @@ def bni_find(net, t=4000000):
                 w = (CONSTANTS.BNI_REF - yy0) / slope
 
     w_save = w_save[:it]
-    bni = bni[:, :it]
+    bni = bni[:it, :]
 
     # calculate the exact coupling value for which bni=0.5
-    w = np.sort(w_save)  # no optional argument with numba
+    w = np.sort(w_save.T).T
     i_w = np.argsort(w_save, axis=0)
-    bni = np.mean(np.mean(bni, axis=0), axis=0)
+    bni = np.asarray([np.mean(bni[i, :]) for i in range(it)])
     w_ref = ref_bni(w, bni[i_w], 0.5)
 
     return w_ref, bni, w_save
@@ -210,8 +227,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     :param individ: A binary array that corresponds to an individual (1 for resecting the node, 0 for keeping the node).
     :param w: The coupling value for which BNI = 0.5.
     :param net: Network.
-    :param t: timesteps
-    :param seed: controls the random distribution
+    :param t: timesteps.
     :return: DeltaBNI of the network for the specific resection as specified by the individ
     """
     # Allocate delta_bni matrix: (1 x noise realiz)
@@ -221,19 +237,17 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     resected_position = np.where(individ == 0)
 
     # Remove rows for the resected nodes
-    net = net[:, resected_position[0]]  # deletes 31 nodes, not 29
+    net = net[:, resected_position[0]]
 
     # Remove columns from the resected nodes
     net = net[resected_position[0], :]
 
     # Calculate delta_bni for different noise runs
-    for noise in range(CONSTANTS.N_N):
+    for noise in prange(CONSTANTS.N_N):
         delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t)) / 0.5
 
-    # Set value to the return value
     # Calculate the mean across the noise runs
-    delta_bni = np.mean(delta_bni)
-    return delta_bni
+    return np.mean(delta_bni)
 
 
 @nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
@@ -264,7 +278,6 @@ def fitness_function(x, w, net, t=4000000):
     # allocate a matrix for the output
     y2 = np.ones(pop_size)
 
-    # TODO vectorise and multithread loop?
     # Calculate the fitness for each individual
     for count_indiv in prange(pop_size):
         individ = x[count_indiv, :]
@@ -280,16 +293,3 @@ def fitness_function(x, w, net, t=4000000):
     y[:, 0] = y1
     y[:, 1] = y2
     return y
-
-
-if __name__ == "__main__":
-    t = TEST_CONSTANTS.TIME_STEPS
-    mat_contents = io.loadmat(TEST_CONSTANTS.NETWORK_LOCATION)  # load marc's network
-    network = mat_contents[TEST_CONSTANTS.NETWORK_NAME]
-    np.random.seed(1337)
-    #noise = randn2(t, len(network))
-    w = 25
-    num_nodes_resected = 0  # test for BNI of whole network
-
-    bni = theta_model_p(network, w, num_nodes_resected, t)
-    print(bni)
