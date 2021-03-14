@@ -5,6 +5,7 @@ from fastapi import FastAPI
 import threading
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from PythonCode.GenerateArtificial.GenerateModel import get_artificial_net
 
 """{
     "nodes": [
@@ -41,19 +42,15 @@ gui_adapter.add_middleware(
     allow_headers=["*"],
 )
 
-@gui_adapter.get("/")
-def getNetwork():
+def getJsonfromAdj(adj_mat):
     nodes = []
     edges = []
-    adj_mat = io.loadmat('../resources/net.mat')
-    adj_mat = adj_mat['net']
-    print(type(adj_mat))
     for row in range(len(adj_mat)):
         # node object
         nodes.append({
             "id": row
         })
-
+    #TODO parametert
     for i, row in enumerate(adj_mat):
         for j, link in enumerate(row):
             if link > 0.008:
@@ -65,6 +62,18 @@ def getNetwork():
 
     network = {"nodes": nodes, "links": edges}
     return json.dumps(network)
+
+@gui_adapter.get("/")
+def getNetwork(artificial: bool = False, nodes: int = 20, edges: int = 100, structure: str = "random"):
+    if artificial:
+        art_mat = get_artificial_net(nodes, edges, structure)
+        return getJsonfromAdj(art_mat)
+    else:
+        default_mat = io.loadmat('../resources/net.mat')
+        default_mat = default_mat['net']
+        return getJsonfromAdj(default_mat)
+
+
 
 
 if __name__ == '__main__':

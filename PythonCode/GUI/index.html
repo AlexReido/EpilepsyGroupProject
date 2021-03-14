@@ -4,59 +4,84 @@
 <head>
   <link rel="stylesheet" href="styles.css">
   <script src="//unpkg.com/3d-force-graph"></script>
-  <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script>
-  <script src="/node_modules/three/build/three.js"></script>
-  <script src="/node_modules/JQuery/lib/node-jquery.js"></script>
+  <!-- <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script> -->
+  <!-- <script src="/node_modules/three/build/three.js"></script> -->
+  <!-- <script src="/node_modules/JQuery/lib/node-jquery.js"></script> -->
+
+  <!-- <script src="//unpkg.com/three-spritetext"></script> -->
+  <script src=//threejs.org/build/three.js></script>
+
   <title>ESP</title>
 
 </head>
 <body>
 
   <div class="parent">
-   <header class="pink section">Header</header>
+   <header class="pink section">
+     <button id="btn_loadnet" onclick="getnet()">Load network</button>
+     <button id="btn_loadart" onclick="getart()">Load artificial</button>
+     Number of nodes:
+     <input type="number" id="nodes" name="nnodes" min="10" max="60">
+     Number of edges:
+     <input type="number" id="edges" name="nedges" min="20" max="120">
+
+     <button id="btn_reset">Reset view</button>
+   </header>
    <div class="left-side blue section" contenteditable>Left Sidebar</div>
-   <main id="3d-graph" class="section coral" contenteditable>
-     <!-- <div >
-       < <div style="position: absolute;"> -->
-     <!-- The text to be added, will be written here! :) -->
-     <!-- </div> --> -->
-   </main>
+   <div class="maincontain">
+     <main id="3d-graph" class="section coral" contenteditable>
+       <!-- <div >
+         < <div style="position: absolute;"> -->
+       <!-- The text to be added, will be written here! :) -->
+       <!-- </div> --> -->
+     </main>
+   </div>
    <div class="right-side yellow section" contenteditable>Right Sidebar</div>
    <footer class="green section">Footer</footer>
  </div>
 
 
-  <script type="module">
+  <script>
 
-    function getnet() {
+
+
+    function getnet(params = "") {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           console.log("recieved network!");
           var graphdata = JSON.parse(JSON.parse(this.responseText));
-          // console.log(graphdata)
-
-          // console.log(graphdata[0])
-          // console.log(graphdata[1])
-          // console.log(graphdata[2])
-          // console.log(graphdata[3])
-          // console.log(graphdata[4])
-          console.log(graphdata.nodes)
+          // console.log(graphdata.nodes)
           const selectedNodes = new Set();
            // const highlightLinks = new Set();
           let hoverNode = null;
-          const graph = ForceGraph3D()
+          const graph = ForceGraph3D() // should be const
             (document.getElementById('3d-graph'))
               // .nodeColor(node => 'rgb(255,0,111,1)')
-              .nodeColor(node =>selectedNodes.has(node) ? 'rgba(219,131,16,0.8)': 'rgb(255,0,111,0.8)')
-              .nodeOpacity(1)
+              // pink = 'rgb(255,0,255,0.7)'
+              // orange = 'rgba(219,131,16,0.7)'
+              // blue = 'rgb(0,0,170,0.7)'
+              // red = 'rgb(255,51,51,0.7)'
+              // left selected and right normal
+              .nodeColor(node =>selectedNodes.has(node) ? 'rgb(255,10,10,0.8)': 'rgb(0,0,170,0.7)')
+              // .nodeOpacity(1)
+              .nodeLabel(d => `<span style="font-size: 170%; color: #01653A; font-weight: bold;">${d.id}</span>`)
+              // .onNodeHover(node => elem.style.cursor = node ? 'pointer' : null)
+              // .nodeThreeObject(node => {
+              //   const sprite = new SpriteText(node.id);
+              //   sprite.material.depthWrite = false; // make sprite background transparent
+              //   sprite.color = node.color;
+              //   sprite.textHeight = 8;
+              //   return sprite;
+              // })
               .enableNodeDrag(false)
-              .linkColor(link => 'rgba(124,21,65,1)')
+              // purple 'rgba(124,21,65,1)'
+              .linkColor(link => 'rgba(30,30,30,0.3)')
               // link width is very slow
               // .linkWidth(0.5)
               .linkOpacity(1)
-              .width(1200)
-              .height(800)
+              // .width(1200)
+              // .height(800)
               .onNodeClick((node, event) => {
                   if (event.ctrlKey || event.shiftKey || event.altKey) { // multi-selection
                     selectedNodes.has(node) ? selectedNodes.delete(node) : selectedNodes.add(node);
@@ -69,10 +94,16 @@
               })
               .graphData(graphdata);
           graph.renderer().setClearColor( 0x000000, 0 );
-          console.log(graph.backgroundColor());
           graph.backgroundColor('#FFFFFF');
-          console.log(graph.backgroundColor());
-          console.log(graph.scene());
+
+          // console.log(graph.renderer().domElement);
+          graph.renderer().domElement.style = "grid-column: 2 / 3";
+          graph.renderer().domElement.removeAttribute("width");
+          graph.renderer().domElement.removeAttribute("height");
+
+          // console.log(graph.renderer().domElement);
+
+
           function updateHighlight() {
             // trigger update of highlighted objects in scene
             graph
@@ -80,13 +111,60 @@
               // .linkWidth(Graph.linkWidth())
               // .linkDirectionalParticles(Graph.linkDirectionalParticles());
           }
+          function resetView() {
+            graph.zoomToFit(400)
+            // graph.onEngineStop(() => );
+          }
+          var button = document.getElementById("btn_reset");
+          button.onclick = function(){resetView()};
+
+          var element = document.getElementById('3d-graph')
+          // console.log(getComputedStyle(element));
+          element.style.flexBasis = "inherit";
+          element.style.gridColumn = "2 / 3";
+          element.style.placeItems = "center";
+          element.style.height = "inherit";
+          element.style.width = "inherit";
+          graph.renderer().domElement.style.height = "inherit";
+          graph.renderer().domElement.style.width = "inherit";
+          graph.renderer().domElement.style.placeItems = "center";
+          graph.renderer().domElement.style.flexBasis = "inherit";
+          // element.style.removeProperty('blockSize');
+          // element.style.removeProperty('height');
+          // element.style.removeProperty('width');
+          // element.style.removeProperty('inlineSize');
+          // element.style.removeProperty('perspectiveOrigin');
+          // element.style.removeProperty('transformOrigin');
+          // element.style.removeProperty('webkitLogicalHeight');
+          // element.style.removeProperty('webkitPerspectiveOrigin');
+          // element.style.removeProperty('webkitLogicalWidth');
+          // console.log(getComputedStyle(element));
         }
       };
-      xhttp.open("GET", "http://127.0.0.1:5000", true);
+      var url = "http://127.0.0.1:5000" + params
+      xhttp.open("GET", url, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
       xhttp.send();
     }
-    getnet();
+    // var net = getnet();
+
+    function getart(){
+
+      nodes = document.getElementById("nodes").value;
+      edges = document.getElementById("edges").value;
+      console.log(nodes);
+      console.log(edges);
+      let extraparam = ""
+      if (nodes !== null) {
+        extraparam = extraparam + "&nodes=" + nodes.toString()
+      }
+      if (edges !== null) {
+        extraparam = extraparam + "&edges=" + edges.toString()
+      }
+      getnet('?artificial=True'+ extraparam);
+    }
+
+
     // TODO on reset button: Graph.zoomToFit(400))
 
     // import * as THREE from '/node_modules/three/build/three.js';

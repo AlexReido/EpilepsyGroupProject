@@ -1,3 +1,6 @@
+  html,body {
+      height:100%;
+  }
 
   .ex5 .parent {
     display: grid;
@@ -18,6 +21,9 @@
     grid-column: 2 / 3;
   }
 
+  .ex5 .maincontain {
+    grid-column: 2 / 3;
+  }
   .ex5 .right-side {
     padding: 2rem;
     grid-column: 3 / 4;
