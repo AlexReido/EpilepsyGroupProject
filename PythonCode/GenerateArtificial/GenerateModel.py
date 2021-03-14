@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 import bct
 import numpy as np
-import matlab.engine
+#import matlab.engine
 from numpy import inf
 
 app = FastAPI()

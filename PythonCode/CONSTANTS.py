@@ -15,3 +15,4 @@ DELTA_BNI = 0.5  # used to calculate the value of delta BNI
 NUM_GEN = 100  # number of generations
 POP_SIZE = 200  # population size in each generation
 NUM_GA_RUNS = 1  # number of GA runs
+ERROR = 0.00001  # w ref margin of error
