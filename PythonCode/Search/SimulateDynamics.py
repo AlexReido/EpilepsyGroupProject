@@ -41,7 +41,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
         ictogenicity = (i_sig * np.random.randn(1, nodes)) + CONSTANTS.DIST + ((1 - np.cos(
             theta_old - theta_start)) @ wnet)
         #ictogenicity = (i_sig * np.random.randn(nodes, 1).T) + CONSTANTS.DIST + ((1 - np.cos(
-            #theta_old - theta_start)) @ wnet)
+            #theta_old - theta_start)) @ wnet)  # to use MATLAB values
         theta_old = theta_old + (CONSTANTS.DT * (1 - cos_theta_old + ((1 + cos_theta_old) * ictogenicity)))
         x[time, :] = 0.5 * (1 - np.cos(theta_old - theta_start)) > CONSTANTS.THRESHOLD
 
@@ -243,7 +243,7 @@ def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     net = net[resected_position[0], :]
 
     # Calculate delta_bni for different noise runs
-    for noise in prange(CONSTANTS.N_N):
+    for noise in range(CONSTANTS.N_N):
         delta_bni[0, noise] = (CONSTANTS.DELTA_BNI - theta_model_p(net, w, num_resect_nodes, t=t)) / 0.5
 
     # Calculate the mean across the noise runs
