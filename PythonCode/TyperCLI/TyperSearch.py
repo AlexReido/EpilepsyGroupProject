@@ -42,7 +42,9 @@ def main(
     searcher = SearchNetwork(algorithm, network=net, timesteps=t)
     swp = SearchWProgress()
 
+    # TODO start timer
     results = swp.dosearch(searcher, gen, n)
+    # TODO finish timer
     typer.echo(results.F)
     #typer.echo(results.X)
 
