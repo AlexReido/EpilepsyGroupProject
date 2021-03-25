@@ -22,8 +22,8 @@ class BinaryRandomSamplingLimit(BinaryRandomSampling):
         pop = []
 
         for i in range(n_samples):
-            number_resected = random.randrange(0, self.maxNodes)
-            indexes = random.sample(range(problem.n_var), number_resected)
+            number_resected = random.randrange(1, self.maxNodes)
+            indexes = random.sample(range(1, problem.n_var), number_resected)
             nodes = [False] * problem.n_var
             nodes = [True if i in indexes else x for i, x in enumerate(nodes)]
             # print(nodes)
@@ -100,7 +100,7 @@ class BinaryBitflipMutationLimit(Mutation):
 
                 newnodelist[flip] = np.logical_not(nodelist[flip])
                 newnodelist[no_flip] = nodelist[no_flip]
-                if sum(newnodelist) <= self.max_nodes:
+                if sum(newnodelist) <= self.max_nodes and sum(newnodelist) != 0:
                     inlimit = True
                     _X.append(list(newnodelist.astype(np.bool)))
         # print(_X)

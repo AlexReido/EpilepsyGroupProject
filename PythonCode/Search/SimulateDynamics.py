@@ -32,7 +32,7 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     i_sig = CONSTANTS.NOISE / np.sqrt(CONSTANTS.DT)
 
     x = np.full((t, nodes), False)
-    theta_start = np.empty((1, nodes))
+    theta_start = np.zeros((1, nodes))
     theta_start[:] = -np.real(np.arccos(np.divide(1 + CONSTANTS.DIST, 1 - CONSTANTS.DIST)))
     theta_old = theta_start
 
@@ -218,7 +218,7 @@ def bni_find(net, t=4000000):
     return w_ref, bni, w_save
 
 
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+@nb.jit(nopython=True, nogil=True, cache=True, fastmath=True)
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     """
     DeltaBNI calculation for the given network.

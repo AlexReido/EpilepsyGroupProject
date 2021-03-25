@@ -72,7 +72,7 @@ class SearchNetwork:
         elif self.searchAlgo == "NSGA2":
             print("NSGA-II")
             search = NSGA2(
-                pop_size=10,
+                pop_size=200,
                 sampling=BinaryRandomSamplingLimit(max_nodes),
                 crossover=UniformCrossoverLimit(max_nodes),
                 mutation=BinaryBitflipMutationLimit(max_nodes),
@@ -102,14 +102,12 @@ if __name__ == '__main__':
     # ref_dirs = get_reference_directions("das-dennis", 2, n_partitions=8)
     #
     # get_visualization("scatter").add(ref_dirs).show()
-    # TODO print time
     sn = SearchNetwork("NSGA2", timesteps=4000000)
     res = sn.search(30, 15)
     #for i, generation in enumerate(res.opt):
         #print("Generation: ", str(i))
         #for ind in generation:
             #print(ind[0], ind[1])
-    # TODO print time
     print("Nodes")
     for nlist in res.X:
          node_indexes = [i for i, x in enumerate(nlist) if x]
