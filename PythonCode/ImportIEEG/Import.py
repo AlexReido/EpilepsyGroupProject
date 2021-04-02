@@ -18,6 +18,13 @@ def convert(mat_contents, var):
     return adj
 
 
+
+def getAdjacency(data):
+    """ Converts string from matlab file
+        :returns the adjacency matrix"""
+    return
+    # returns numpy adjacency matrix
+
 if __name__ == "__main__":
     mat_contents = io.loadmat('..\\resources\\HUP064_sz_1.mat')  # load marc's network
     adj = convert(mat_contents, 'data')
