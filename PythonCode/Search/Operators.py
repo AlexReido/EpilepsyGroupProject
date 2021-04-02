@@ -100,7 +100,7 @@ class BinaryBitflipMutationLimit(Mutation):
 
                 newnodelist[flip] = np.logical_not(nodelist[flip])
                 newnodelist[no_flip] = nodelist[no_flip]
-                if sum(newnodelist) <= self.max_nodes:
+                if sum(newnodelist) <= self.max_nodes and sum(newnodelist) != 0:
                     inlimit = True
                     _X.append(list(newnodelist.astype(np.bool)))
         # print(_X)

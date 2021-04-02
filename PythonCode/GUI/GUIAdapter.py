@@ -2,6 +2,7 @@
 import json
 from scipy import io
 from fastapi import FastAPI
+from pydantic import BaseModel
 import threading
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
@@ -82,6 +83,16 @@ def getSearchStatus(jsonNet, nodelist: list = []):
 
         return json.dumps(result)
 
+
+class Item(BaseModel):
+    matfile:str
+
+
+from PythonCode.ImportIEEG.Import import *
+
+@gui_adapter.post("/ieeg")
+def convertIeeg(item: Item):
+    return json.dumps(getAdjacency(item))
 
 if __name__ == '__main__':
 
