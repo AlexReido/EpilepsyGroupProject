@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>ESP</title>
+  <!-- <link rel="stylesheet" type="text/css" href="home.css"> -->
+<style>
+
+</style>
+</head>
+<body>
+<input type="file" data-buttonText="Open network file"/>
+
+<script>
+  localStorage.setItem("net", null);
+
+  const fileopen = document.querySelector('input[type="file"]')
+
+  function onRecievefromServer(){
+    console.log("read in= ", adjacency_matrix);
+    var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
+
+    localStorage.setItem("net", graphJson);
+    // TODO GOTO SEARch
+  }
+
+  function sendMattoServer(data){
+    var url = "http://127.0.0.1:5000/ieeg"
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", url, true);
+    xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
+    console.log(JSON.stringify({"matfile":data}));
+    xhttp.send(JSON.stringify({"matfile":data}));
+  }
+
+  fileopen.addEventListener('change', function(e){
+    // console.log(fileopen.files);
+    const reader = new FileReader();
+    reader.onload = function(){
+      matlabData = reader.result;
+      console.log(matlabData);
+
+      sendMattoServer(matlabData);
+
+    }
+    reader.readAsText(fileopen.files[0]);
+  }, false);
+
+
+</script>
+</body>
+</html>
