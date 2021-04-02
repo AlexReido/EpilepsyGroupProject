@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>ESP</title>
+  <!-- <link rel="stylesheet" type="text/css" href="home.css"> -->
+<style>
+  #parent {
+    height: 300px;
+    display: grid;
+    grid-gap: 3rem;
+    grid-template-columns: repeat(3,1fr);
+  }
+
+  #box {
+    flex: 1 1 890px; /*  Stretching: */
+    /* flex: 0 1 150px; /*  No stretching: */ */
+    margin: 30px;
+    /* place-items: center; */
+    background-color: #ABBAEA;
+    display: grid;
+    place-items: center;
+  }
+</style>
+</head>
+<body>
+<div id="parent">
+
+  <a id="box" href="generate.html">
+    <div>Generate artificial network</div>
+  </a>
+  <div id="box"><div>Import iEEG</div></div>
+  <div id="box"><div>
+    <p>Open network</p>
+    <p>Open results</p>
+
+</div></div>
+</div>
+<script>
+  localStorage.setItem("net", null);
+
+
+</script>
+</body>
+</html>
