@@ -1,0 +1,34 @@
+  html,body {
+      height:100%;
+  }
+
+  .parent {
+    display: grid;
+    grid-template: auto 1fr auto / auto 0.5fr auto;
+  }
+
+  header {
+    padding: 1rem;
+    grid-column: 1 / 4;
+  }
+
+  .left-side {
+    padding: 5px;
+    grid-column: 1 / 2;
+  }
+
+  main {
+    grid-column: 2 / 3;
+  }
+
+  .maincontain {
+    grid-column: 2 / 3;
+  }
+  .right-side {
+    padding: 2rem;
+    grid-column: 3 / 4;
+  }
+
+  footer {
+    grid-column: 1 / 4;
+  }
