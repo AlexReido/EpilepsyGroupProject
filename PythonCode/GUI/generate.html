@@ -56,15 +56,15 @@
 
   <div class="parent">
    <header class="pink section">
-     <button id="btn_loadnet" onclick="getnet()">Load default network</button>
-     <button id="btn_loadart" onclick="getart()">Generate artificial</button>
+     <button id="btn_loadnet" onclick="getNetwork()">Load default network</button>
+     <button id="btn_loadart" onclick="getArtificial()">Generate artificial</button>
      Number of nodes:
      <input type="number" id="nodes" name="nnodes" min="10" max="60">
      Number of edges:
      <input type="number" id="edges" name="nedges" min="20" max="120">
 
      <button id="btn_reset">Reset view</button>
-     <button id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <button id="btn_saveNet" onclick="saveNetwork()">Save network</button>
      <input type="file" data-buttonText="Open network file"/>
      <a id="search_link" href="search.html">
        <button id="btn_search">Search Network</button>
@@ -87,8 +87,8 @@
    </footer>
  </div>
 
-
   <script>
+    import { saveNet, getnet, getart} from './graph.js';
     var adjacency_matrix = null;
 
     const fileopen = document.querySelector('input[type="file"]')
@@ -300,10 +300,10 @@
       getnet('?artificial=True'+ extraparam);
     }
 
-    const openNet = document.querySelector('input[type="file"]')
-    openNet.addEventListener('change', function(e) {
-      console.log(openNet.files[0])
-    })
+    // const openNet = document.querySelector('input[type="file"]')
+    // openNet.addEventListener('change', function(e) {
+    //   console.log(openNet.files[0])
+    // })
 
 
     // TODO on reset button: Graph.zoomToFit(400))
