@@ -20,14 +20,14 @@ def convert(mat_contents, var):
 
 def get_adjacency(data):
     """ Converts string from matlab file
-        :returns the adjacency matrix"""
+        :returns the adjacency matrix as a numpy array"""
     f = open("..\\resources\\curr_network.mat", "w")
     f.write(data)
     f.close()
     adj = convert(io.loadmat('..\\resources\\curr_network.mat'), 'data')
     return adj
-    # returns numpy adjacency matrix
 
 if __name__ == "__main__":
     data = []
     get_adjacency(data)
+
