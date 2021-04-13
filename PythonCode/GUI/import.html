@@ -28,7 +28,7 @@
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", url, true);
     xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
-    console.log(JSON.stringify({"matfile":data}));
+    // console.log(JSON.stringify({"matfile":data}));
     xhttp.send(JSON.stringify({"matfile":data}));
   }
 

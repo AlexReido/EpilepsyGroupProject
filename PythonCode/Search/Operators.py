@@ -116,11 +116,19 @@ class MyCallback(Callback):
         self.swp=swp
 
     def notify(self, algorithm):
-        if self.swp != None:
-            self.swp.nextgeneration()
+
         self.n_evals.append(algorithm.evaluator.n_eval)
         # print(len(self.n_evals))
         results = []
         for ind in algorithm.opt:
             results.append(ind.F)
+
+         # newline
+        if self.swp != None:
+        #     self.swp.nextgeneration()
+            print("generation: ", algorithm.evaluator.n_eval)
+            l = [list(l) for l in results]
+            print("results: ", l)
+            self.swp.result = {algorithm.evaluator.n_eval/10: l}
+
         self.opt.append(results)

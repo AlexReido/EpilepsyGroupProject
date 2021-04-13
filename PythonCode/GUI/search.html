@@ -9,7 +9,7 @@
   <!-- <script src="/node_modules/JQuery/lib/node-jquery.js"></script> -->
 
   <!-- <script src="//unpkg.com/three-spritetext"></script> -->
-  <script src=//threejs.org/build/three.js></script>
+  <!-- <script src=//threejs.org/build/three.js></script> -->
 
   <title>ESP</title>
 </head>
@@ -19,8 +19,20 @@
    <header class="pink section">
 
      <button id="btn_reset">Reset view</button>
+     <label for="fname">Filename:</label>
+     <input type="text" id="fname" name="fname">
+     <button id="btn_search" onclick="searchNet()">Search Network</button>
      <button id="btn_saveNet" onclick="saveNet()">Save network</button>
-     <input type="file" data-buttonText="Open network file"/>
+     <!-- <input type="file" data-buttonText="Open network file"/> -->
+     <div>
+       Currently running searches:
+        <!-- <option selected disabled>Choose here</option>
+        <option value="1">One</option>
+        <option value="2">Two</option>
+        <option value="3">Three</option>
+        <option value="4">Four</option>
+        <option value="5">Five</option> -->
+    </div>
    </header>
    <div id="left" class="left-side blue section" contenteditable></div>
    <div class="maincontain">
@@ -28,7 +40,22 @@
 
      </main>
    </div>
-   <div class="right-side yellow section" contenteditable></div>
+   <div id="right" class="right-side yellow section" contenteditable>
+     <table>
+        <thead>
+            <tr>
+              <th>Results of generation </th>
+            </tr>
+            <tr>
+                <th>The number of nodes resected:</th>
+                <th>The BNI:</th>
+            </tr>
+        </thead>
+        <tbody id="table body">
+
+        </tbody>
+    </table>
+   </div>
    <footer class="green section">
      <a href="home.html">
        <button id="btn_home">Home page</button>
@@ -46,19 +73,102 @@
       displaygraph(graphJson);
     }
 
-    const fileopen = document.querySelector('input[type="file"]')
-    fileopen.addEventListener('change', function(e){
-      // console.log(fileopen.files);
-      const reader = new FileReader();
-      reader.onload = function(){
-        adjacency_matrix = reader.result;
-        console.log("read in= ", adjacency_matrix);
-        var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
-        // console.log(graphJson);
-        displaygraph(graphJson);
+    function updateResults(results){
+      var res_list = "";
+      //  = <tr>
+      //     <td>The table body</td>
+      //     <td>with two columns</td>
+      // </tr>;
+      // results = JSON.parse(results);
+      // console.log(results);
+      gen_num = Object.keys(results)[0];
+      res_list = res_list + String(gen_num) + ":<br />"
+      results = results[gen_num];
+      console.log(results);
+      for (var n of results){
+        console.log(n);
+        let val = "<tr> <td> " + n[0] + "</td><td>"+ n[1] + "</td> </tr>"; //+ "<br />"
+        console.log(val)
+        res_list = res_list + val;
       }
-      reader.readAsText(fileopen.files[0])
-    }, false);
+      document.getElementById("table body").innerHTML = res_list;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function pollServer(filename){
+      finished = false;
+      while (finished == false){
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            console.log("recieved results!");
+            // console.log(JSON.parse(this.responseText));
+            res = JSON.parse(JSON.parse(this.responseText));
+            console.log(res.results);
+            finished = res.finished;
+            console.log(res.finished);
+            if (res.results != {}){
+              updateResults(res.results);
+            }
+            // console.log(graphdata.nodes
+          }
+        };
+        var url = "http://127.0.0.1:5000/search/?filename=" + filename;
+        xhttp.open("GET", url, true);
+        xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+        xhttp.send();
+        await sleep(5000);
+      }
+    }
+
+    async function searchNet(){
+      var url = "http://127.0.0.1:5000/search"
+      var xhttp = new XMLHttpRequest();
+      filename = document.getElementById("fname").value;
+      // xhttp.onreadystatechange = function() {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     console.log("recieved results!!");
+      //     console.log(this.responseText);
+      //
+      //     // var graphdata = getGraphData(this.responseText, 0.008);
+      //     // console.log("json==", graphdata);
+      //     // // console.log(graphdata.nodes)
+      //     // displaygraph(graphdata);
+      //   }
+      // };
+      xhttp.open("POST", url, true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
+      // console.log(JSON.stringify({"matfile":data}));
+
+      data = {"filename":filename,
+              "adj_mat": adjacency_matrix,
+              "node_list": [],
+              "n_gens": 30,
+              "max_nodes": 20
+            };
+      xhttp.send(JSON.stringify(data));
+      await sleep(4000)
+      pollServer(filename)
+    }
+
+    // TODO openresullts file in another page?
+
+    // const fileopen = document.querySelector('input[type="file"]')
+    // fileopen.addEventListener('change', function(e){
+    //   // console.log(fileopen.files);
+    //   const reader = new FileReader();
+    //   reader.onload = function(){
+    //     adjacency_matrix = reader.result;
+    //     console.log("read in= ", adjacency_matrix);
+    //     var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
+    //     // console.log(graphJson);
+    //     displaygraph(graphJson);
+    //   }
+    //   reader.readAsText(fileopen.files[0])
+    // }, false);
 
     function updateSelectedList(selectedNodes){
       var node_list = "Selected nodes: <br />";
@@ -212,11 +322,6 @@
       var element = document.getElementById('3d-graph')
 
     }
-
-    const openNet = document.querySelector('input[type="file"]')
-    openNet.addEventListener('change', function(e) {
-      console.log(openNet.files[0])
-    })
 
   </script>
 </body>
