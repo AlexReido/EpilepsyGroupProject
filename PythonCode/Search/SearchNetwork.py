@@ -41,6 +41,8 @@ class SearchNetwork:
             self.net = network
 
     def search(self, nGen=100, max_nodes=20, swp=None):
+        print("Do ing search with ", swp)
+        print("NGen ", nGen)
         # first check if the network has ones in its main diagonal (if yes we delete them)
         length_net = len(self.net)
         if (np.diag(self.net) == np.ones((length_net, 1))).all:
@@ -87,11 +89,12 @@ class SearchNetwork:
                        callback=callback,
                        seed=1,
                        save_history=True,
-                       verbose=False)
+                       verbose=True)
 
 
         # print("Number of Nodes, (1-Delta BNI value)")
         # print(res.F)  # final fitness
+        swp.returnResults(res)
         return res
         #print("Number of Nodes, (1-Delta BNI value)")
         #print(res.F)  # final fitness

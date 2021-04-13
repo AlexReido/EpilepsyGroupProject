@@ -9,54 +9,16 @@
   <!-- <script src="/node_modules/JQuery/lib/node-jquery.js"></script> -->
 
   <!-- <script src="//unpkg.com/three-spritetext"></script> -->
-  <script src=//threejs.org/build/three.js></script>
+  <!-- <script src=//threejs.org/build/three.js></script> -->
 
   <title>ESP</title>
-<!-- <style>
-  html,body {
-      height:100%;
-  }
-
-  .parent {
-    display: grid;
-    grid-template: auto 1fr auto / auto 0.5fr auto;
-  }
-
-  header {
-    padding: 1rem;
-    grid-column: 1 / 4;
-  }
-
-  .left-side {
-    padding: 1px;
-    grid-column: 1 / 2;
-  }
-
-  main {
-    grid-column: 2 / 3 !important;
-    width:100%;
-  }
-
-  .maincontain {
-    grid-column: 2 / 3;
-  }
-  .right-side {
-    padding: 2rem;
-    grid-column: 3 / 4;
-  }
-
-  footer {
-    grid-column: 1 / 4;
-  }
-
-</style> -->
 
 </head>
 <body>
 
   <div class="parent">
    <header class="pink section">
-     <button id="btn_loadnet" onclick="getNetwork()">Load default network</button>
+     <button id="btn_loadnet" onclick="getnet()">Load default network</button>
      <button id="btn_loadart" onclick="getArtificial()">Generate artificial</button>
      Number of nodes:
      <input type="number" id="nodes" name="nnodes" min="10" max="60">
@@ -88,7 +50,7 @@
  </div>
 
   <script>
-    import { saveNet, getnet, getart} from './graph.js';
+    // import { saveNet, getnet, getart} from './graph.js';
     var adjacency_matrix = null;
 
     const fileopen = document.querySelector('input[type="file"]')
@@ -151,7 +113,7 @@
         a.download = fileName;
         a.click();
       }
-      console.log(data);
+      // console.log(data);
       download(data, 'json.txt', 'text/plain');
       // var csvfile = new Blob(data);
       // console.log(csvfile);
@@ -166,7 +128,7 @@
       }else{
         var adj =JSON.parse(adjacency);
       }
-      console.log(adj)
+      // console.log(adj)
       adjacency_matrix = adj;
       // document.getElementById("search_link").setAttribute("href","search.html & net="+adjacency_matrix);
       localStorage.setItem("net", JSON.stringify(adjacency_matrix));
@@ -190,8 +152,8 @@
         });
         i ++;
       });
-      console.log(nodes);
-      console.log(edges);
+      // console.log(nodes);
+      // console.log(edges);
       return {"nodes": nodes, "links": edges};
     }
 
@@ -304,48 +266,6 @@
     // openNet.addEventListener('change', function(e) {
     //   console.log(openNet.files[0])
     // })
-
-
-    // TODO on reset button: Graph.zoomToFit(400))
-
-    // import * as THREE from '/node_modules/three/build/three.js';
-    // var ForceGraph3D = require('3d-force-graph');
-    // Random tree
-    // const GROUPS = 12;
-    // const N = 300;
-    // const gData = {
-    //   nodes: [...Array(N).keys()].map(i => ({ id: i, group:  Math.ceil(Math.random() * GROUPS)})),
-    //   links: [...Array(N).keys()]
-    //     .filter(id => id)
-    //     .map(id => ({
-    //       source: id,
-    //       target: Math.round(Math.random() * (id-1))
-    //     }))
-    // };
-    // var renderer = new THREE.WebGLRenderer( { alpha: true } );
-    // renderer.setClearColor( 0x000000, 0 );
-
-    // const graph = ForceGraph3D()
-    //   (document.getElementById('3d-graph'))
-    //     .nodeAutoColorBy('group')
-    //     .nodeOpacity(1)
-    //     .enableNodeDrag(false)
-    //     .linkColor('#00FF00')
-    //     // link width is very slow
-    //     // .linkWidth(0.5)
-    //     .linkOpacity(1)
-    //     .graphData(graphdata);
-    // graph.renderer().dispose();
-    // graph.renderer() = new THREE.WebGLRenderer( { alpha: true } );
-    // graph.renderer().setClearColor( 0x000000, 0 );
-    // // graph.renderer().clearColor();
-    // // graph.renderer().state.reset();
-    // // graph.renderer().setClearAlpha(1);
-    // // graph.renderer().clear(true, true, true);
-    // console.log(graph.backgroundColor());
-    // graph.backgroundColor('#FFFFFF');
-    // console.log(graph.backgroundColor());
-    // console.log(graph.scene());
 
     // TODO add brain loadModel
     //https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_obj.html
