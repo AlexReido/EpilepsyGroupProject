@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="generate.css">
+  <link rel="stylesheet" href="search.css">
   <script src="//unpkg.com/3d-force-graph"></script>
   <!-- <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script> -->
   <!-- <script src="/node_modules/three/build/three.js"></script> -->
@@ -23,18 +23,21 @@
      <input type="text" id="fname" name="fname">
      <button id="btn_search" onclick="searchNet()">Search Network</button>
      <button id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <button id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
+     <button id="btn_refresh_searches" onclick="get_searches()">Get searches</button>
+    <button id="btn_get_search" onclick="get_searches()">Get search status</button>
      <!-- <input type="file" data-buttonText="Open network file"/> -->
+
+   </header>
+   <div id="left" class="left-side blue section" contenteditable>
+     <div id="selectedNodes">
+     </div>
      <div>
        Currently running searches:
-        <!-- <option selected disabled>Choose here</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
-        <option value="4">Four</option>
-        <option value="5">Five</option> -->
+       <div id="running_searches" style="margin-top:10px;">
+      </div>
     </div>
-   </header>
-   <div id="left" class="left-side blue section" contenteditable></div>
+   </div>
    <div class="maincontain">
      <main id="3d-graph" class="section coral" contenteditable>
 
@@ -66,12 +69,95 @@
 
   <script>
     var adjacency_matrix =localStorage.getItem("net");
-    console.log(adjacency_matrix);
+    var globalresults = null;
+
+    var selectedDiv = "";
+    var x = document.getElementsByClassName('optionsecoptions')
+    for (var i = 0; i < x.length; i++) {
+        x[i].addEventListener("click", function(){
+
+        var selectedEl = document.querySelector(".selected");
+        if(selectedEl){
+            selectedEl.classList.remove("selected");
+        }
+        this.classList.add("selected");
+
+        }, false);;
+    }
+
+    document.getElementById('btn_get_search').addEventListener('click',function(){
+      var selectedEl = document.querySelector(".selected");
+      if(selectedEl)
+          pollServer(selectedEl.innerText);
+      else
+          alert('please choose an option');
+    })
+
+
+    // console.log(adjacency_matrix);
     if (adjacency_matrix != null){
       var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
       // console.log(graphJson);
       displaygraph(graphJson);
+      // console.log(graphJson);
     }
+
+    function get_searches(){
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log("recieved search list");
+          // console.log(JSON.parse(this.responseText));
+          res = JSON.parse(JSON.parse(this.responseText));
+          // console.log(this.responseText);
+          console.log(JSON.parse(JSON.parse(this.responseText)));
+          var running_searches = "";
+          res.forEach((val, i) => {
+            var div = "<div class='optionsecoptions'>" + val + "</div>";
+            running_searches = running_searches + div;
+          });
+          console.log(running_searches);
+          document.getElementById("running_searches").innerHTML = running_searches;
+          var x = document.getElementsByClassName('optionsecoptions')
+          for (var i = 0; i < x.length; i++) {
+              x[i].addEventListener("click", function(){
+
+              var selectedEl = document.querySelector(".selected");
+              if(selectedEl){
+                  selectedEl.classList.remove("selected");
+              }
+              this.classList.add("selected");
+
+              }, false);;
+          }
+
+        }
+      };
+      var url = "http://127.0.0.1:5000/search/all";
+      xhttp.open("GET", url, true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      xhttp.send();
+    }
+
+    function get_results_plot(){
+      filename = document.getElementById("fname").value;
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log("recieved results!");
+          console.log(JSON.parse(this.responseText));
+
+        }
+      };
+      var url = "http://127.0.0.1:5000/plot/";
+      xhttp.open("POST", url, true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      data = {"filename":filename,
+              "results": globalresults,
+            };
+      xhttp.send(JSON.stringify(data));
+    }
+
 
     function updateResults(results){
       var res_list = "";
@@ -84,6 +170,7 @@
       gen_num = Object.keys(results)[0];
       res_list = res_list + String(gen_num) + ":<br />"
       results = results[gen_num];
+      globalresults = results;
       console.log(results);
       for (var n of results){
         console.log(n);
@@ -125,7 +212,7 @@
     }
 
     async function searchNet(){
-      var url = "http://127.0.0.1:5000/search"
+      var url = "http://127.0.0.1:5000/search/"
       var xhttp = new XMLHttpRequest();
       filename = document.getElementById("fname").value;
       // xhttp.onreadystatechange = function() {
@@ -177,7 +264,7 @@
         let val = String(n.id)+ "<br />"; //+ "<br />"
         node_list = node_list + val;
       }
-      document.getElementById("left").innerHTML = node_list;
+      document.getElementById("selectedNodes").innerHTML = node_list;
     }
 
     function saveNet(){
@@ -206,7 +293,7 @@
       }else{
         var adj =JSON.parse(adjacency);
       }
-      console.log(adj)
+      // console.log(adj)
       adjacency_matrix = adj;
 
       // console.log(adj);
@@ -229,8 +316,8 @@
         });
         i ++;
       });
-      console.log(nodes);
-      console.log(edges);
+      // console.log(nodes);
+      // console.log(edges);
       return {"nodes": nodes, "links": edges};
     }
 
@@ -239,7 +326,7 @@
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           console.log("recieved network!");
-          var graphdata = getGraphData(this.responseText, 0.008);
+          var graphdata = GraphData(this.responseText, 0.008);
           console.log("json==", graphdata);
           // console.log(graphdata.nodes)
           displaygraph(graphdata);

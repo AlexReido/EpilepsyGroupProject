@@ -12,7 +12,7 @@ def extract_result(res):
     return node_nums, bni_vals
 
 
-def plot_pareto_front(data, generations, pop_size, algorithm):
+def plot_pareto_front(data):
     """
 
     :param data: a Nx2 matrix, first column is resected nodes, second column SI score.
@@ -20,8 +20,9 @@ def plot_pareto_front(data, generations, pop_size, algorithm):
     :param pop_size: population sized used for the search algorithm.
     :param algorithm: the search algorithm used
     """
-    x = [len(data[i, 0]) for i in range(len(data[:, 0]))]
-    y = data[:, 1]
+    # x = [len(data[i, 0]) for i in range(len(data[:, 0]))]
+    x = [x[0] for x in data]
+    y = [x[1] for x in data]
 
     plt.title("Set Ictogenicity vs Number of Resected Nodes")
     plt.xlabel("Number of nodes resected")
