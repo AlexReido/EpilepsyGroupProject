@@ -28,20 +28,24 @@
      <div class="dropdown">
       <button class="dropbtn" onclick="settingsDropdown()"><i class="fa fa-cog"></i></button>
       <div id="settingsDropdown" class="dropdown-content">
-        data = {"filename":filename,
-                "adj_mat": adjacency_matrix,
-                "node_list": [],
-                "n_gens": 30,
-                "max_nodes": 20
-              };
-        <label for="fname">Filename:</label>
-        <input type="text" id="fname" name="fname">
 
-
-        <a href="#">Link 1</a>
-        <a href="#">Link 2</a>
-        <a href="#">Link 3</a>
-      </div>
+        <div class="dropped">
+          <label for="fname">Filename:</label>
+          <input type="text" id="fname" name="fname">
+        </div>
+        <!-- <br> -->
+        <div class="dropped">
+          Number of generations:
+          <input type="number" id="generations" name="ngens" min="5" max="200">
+        </div>
+        <!-- <br> -->
+        <div class="dropped">
+          Maximum number of nodes:
+          <br>
+          <input type="number" id="nodes" name="nnodes" min="2" max="120">
+        </div>
+        <button class="dropped" id="customSearchbtn" onclick="customSearch()">Search</button>
+     </div>
      </div>
      <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
      <button class="btn" id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
@@ -55,6 +59,7 @@
      <div id="selectedNodes">
      </div>
      <br>
+     <hr>
      <div>
        Currently running searches:
        <div id="running_searches" style="margin-top:10px;">
@@ -93,7 +98,8 @@
 
   <script>
 
-
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
 
     var adjacency_matrix =localStorage.getItem("net");
     var globalresults = null;
@@ -140,7 +146,7 @@
 
       var plotdata = {
         datasets: [{
-          label: 'Scatter Dataset',
+          // label: 'Scatter Dataset',
           data: datalist,
           backgroundColor: 'rgb(255, 99, 132)'
         }],
@@ -150,12 +156,30 @@
         type: 'scatter',
         data: plotdata,
         options: {
+          plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Pareto front'
+            }
+          },
           scales: {
-            x: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'BNI'
+              },
               type: 'linear',
               position: 'bottom'
-            }
+            }],
+            yAxes: [{
+              type: 'linear',
+              // position: 'bottom'
+            }]
           }
+
         }
       };
 
@@ -200,6 +224,22 @@
         }
       }
     }
+
+    function customSearch(){
+      nodes = document.getElementById("nodes").value;
+      generations = document.getElementById("generations").value;
+      filename = document.getElementById("fname").value;
+      date = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
+      date = date.split(", ")[1] +", " + date.split(", ")[0];
+      data = {"filename":(filename+" " + date),
+              "adj_mat": adjacency_matrix,
+              "node_list": [],
+              "n_gens": generations,
+              "max_nodes": nodes
+            };
+      searchNet(data)
+    }
+
     // ========== Get all searches being run on server ==========================
     function get_searches(){
       var xhttp = new XMLHttpRequest();
@@ -296,7 +336,9 @@
     async function searchNet(data=null){
       var url = "http://127.0.0.1:5000/search/"
       var xhttp = new XMLHttpRequest();
-      filename = document.getElementById("fname").value;
+      date = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
+      // Time first
+      filename = date.split(", ")[1] +", " + date.split(", ")[0];
       // xhttp.onreadystatechange = function() {
       //   if (this.readyState == 4 && this.status == 200) {
       //     console.log("recieved results!!");
@@ -321,7 +363,7 @@
       }
       xhttp.send(JSON.stringify(data));
       await sleep(4000)
-      pollServer(filename)
+      pollServer(data.filename)
     }
 
     // TODO openresullts file in another page?
@@ -439,8 +481,8 @@
           // blue = 'rgb(0,0,170,0.7)'
           // red = 'rgb(255,51,51,0.7)'
           // left selected and right normal
-          .height('600') //String(graphHeight))
-          .width('900')  //String(graphWidth))
+          .height(String(window.innerHeight-130)) //600
+          .width(String(window.innerWidth-500))  //900
           .nodeColor(node =>selectedNodes.has(node) ? 'rgb(255,10,10,0.8)': 'rgb(0,0,170,0.7)')
           // .nodeOpacity(1)
           .nodeLabel(d => `<span style="font-size: 170%; color: #01653A; font-weight: bold;">${d.id}</span>`)

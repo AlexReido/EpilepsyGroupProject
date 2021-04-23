@@ -24,10 +24,18 @@ hr {
 
 
 }
+
+/* ======================== LEFt section ===========================*/
+
 .left-side {
   padding: 5px;
   grid-column: 1 / 2;
+
 }
+#left {
+  min-width: 200px;
+}
+
 
 main {
   grid-column: 2 / 3;
@@ -49,14 +57,16 @@ footer {
 
 .optionsecoptions
     {
-    width: 400px;
+    width: 200px;
     padding-left:10px;
-    height: 40px;
+    padding-right:10px;
+    /* height: 40px; */
     background: #bbb8b8;
     float: left;
-    font-size:20px;
+    font-size:16px;
     cursor:pointer;
     }
+
 .optionsecoptions:hover,
     .optionsecoptions:active {
         background-color: #226fa3;
@@ -71,6 +81,19 @@ footer {
         color:#ffffff;
 }
 
+.dropped {
+  padding:10px 5px;
+}
+
+#customSearchbtn {
+  background-color: #4CAF50;
+  /* padding: 5px, 5px; */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 13px;
+  color: white;
+}
 
 .btn {
   background-color: #4CAF50;
@@ -79,6 +102,8 @@ footer {
   font-size: 16px;
   border: none;
 }
+
+
 /* ======================== plot pareto front ===========================*/
 #paretoplotDiv {
   max-width: 300px;
