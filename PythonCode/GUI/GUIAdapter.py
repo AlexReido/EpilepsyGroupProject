@@ -121,6 +121,9 @@ def getAllSearches():
     searches = []
     for search in searchThreads:
         searches.append(search.config.filename)
+
+    print(searches)
+    print(searchThreads)
     return json.dumps(searches)
 
 

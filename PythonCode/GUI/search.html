@@ -3,6 +3,8 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="search.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.1.1/dist/chart.min.js"></script>
   <script src="//unpkg.com/3d-force-graph"></script>
   <!-- <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script> -->
   <!-- <script src="/node_modules/three/build/three.js"></script> -->
@@ -17,21 +19,42 @@
 
   <div class="parent">
    <header class="pink section">
+     <a href="home.html">
+       <button class="btn" id="btn_home">Home page</button>
+    </a>
+     <button class="btn" id="btn_reset">Reset view</button>
 
-     <button id="btn_reset">Reset view</button>
-     <label for="fname">Filename:</label>
-     <input type="text" id="fname" name="fname">
-     <button id="btn_search" onclick="searchNet()">Search Network</button>
-     <button id="btn_saveNet" onclick="saveNet()">Save network</button>
-     <button id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
-     <button id="btn_refresh_searches" onclick="get_searches()">Get searches</button>
-    <button id="btn_get_search" onclick="get_searches()">Get search status</button>
+     <button  class="btn" id="btn_search" onclick="searchNet()">Search Network</button>
+     <div class="dropdown">
+      <button class="dropbtn" onclick="settingsDropdown()"><i class="fa fa-cog"></i></button>
+      <div id="settingsDropdown" class="dropdown-content">
+        data = {"filename":filename,
+                "adj_mat": adjacency_matrix,
+                "node_list": [],
+                "n_gens": 30,
+                "max_nodes": 20
+              };
+        <label for="fname">Filename:</label>
+        <input type="text" id="fname" name="fname">
+
+
+        <a href="#">Link 1</a>
+        <a href="#">Link 2</a>
+        <a href="#">Link 3</a>
+      </div>
+     </div>
+     <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <button class="btn" id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
+     <button class="btn" id="btn_refresh_searches" onclick="get_searches()">Get searches</button>
+    <button class="btn" id="btn_get_search" onclick="get_searches()">Get search status</button>
      <!-- <input type="file" data-buttonText="Open network file"/> -->
-
+     <hr style="">
    </header>
+
    <div id="left" class="left-side blue section" contenteditable>
      <div id="selectedNodes">
      </div>
+     <br>
      <div>
        Currently running searches:
        <div id="running_searches" style="margin-top:10px;">
@@ -58,16 +81,20 @@
 
         </tbody>
     </table>
+    <div id="paretoplotDiv">
+      <canvas id="myChart"></canvas>
+    </div>
    </div>
    <footer class="green section">
-     <a href="home.html">
-       <button id="btn_home">Home page</button>
-    </a>
+
    </footer>
  </div>
 
 
   <script>
+
+
+
     var adjacency_matrix =localStorage.getItem("net");
     var globalresults = null;
 
@@ -102,6 +129,78 @@
       // console.log(graphJson);
     }
 
+    // ==================Plotting chart ===============
+
+
+    function get_results_plot(){
+      datalist=[]
+      for (var n of globalresults){
+        datalist.push({x: n[1], y: n[0]})
+      }
+
+      var plotdata = {
+        datasets: [{
+          label: 'Scatter Dataset',
+          data: datalist,
+          backgroundColor: 'rgb(255, 99, 132)'
+        }],
+      };
+
+      var config = {
+        type: 'scatter',
+        data: plotdata,
+        options: {
+          scales: {
+            x: {
+              type: 'linear',
+              position: 'bottom'
+            }
+          }
+        }
+      };
+
+      var myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+      );
+
+      // filename = document.getElementById("fname").value;
+      // var xhttp = new XMLHttpRequest();
+      // xhttp.onreadystatechange = function() {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     console.log("recieved results!");
+      //     console.log(JSON.parse(this.responseText));
+      //
+      //   }
+      // };
+      // var url = "http://127.0.0.1:5000/plot/";
+      // xhttp.open("POST", url, true);
+      // xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      // data = {"filename":filename,
+      //         "results": globalresults,
+      //       };
+      // xhttp.send(JSON.stringify(data));
+    }
+
+    // ------------------Search settings ----------------------
+    function settingsDropdown() {
+      document.getElementById("settingsDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+    // ========== Get all searches being run on server ==========================
     function get_searches(){
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
@@ -128,7 +227,7 @@
               }
               this.classList.add("selected");
 
-              }, false);;
+              }, false);
           }
 
         }
@@ -139,24 +238,7 @@
       xhttp.send();
     }
 
-    function get_results_plot(){
-      filename = document.getElementById("fname").value;
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          console.log("recieved results!");
-          console.log(JSON.parse(this.responseText));
 
-        }
-      };
-      var url = "http://127.0.0.1:5000/plot/";
-      xhttp.open("POST", url, true);
-      xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
-      data = {"filename":filename,
-              "results": globalresults,
-            };
-      xhttp.send(JSON.stringify(data));
-    }
 
 
     function updateResults(results){
@@ -211,7 +293,7 @@
       }
     }
 
-    async function searchNet(){
+    async function searchNet(data=null){
       var url = "http://127.0.0.1:5000/search/"
       var xhttp = new XMLHttpRequest();
       filename = document.getElementById("fname").value;
@@ -229,13 +311,14 @@
       xhttp.open("POST", url, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
       // console.log(JSON.stringify({"matfile":data}));
-
-      data = {"filename":filename,
-              "adj_mat": adjacency_matrix,
-              "node_list": [],
-              "n_gens": 30,
-              "max_nodes": 20
-            };
+      if (data == null){
+        data = {"filename":filename,
+                "adj_mat": adjacency_matrix,
+                "node_list": [],
+                "n_gens": 30,
+                "max_nodes": 20
+              };
+      }
       xhttp.send(JSON.stringify(data));
       await sleep(4000)
       pollServer(filename)
