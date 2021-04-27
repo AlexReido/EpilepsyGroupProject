@@ -2,7 +2,9 @@
 
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="generate.css">
+  <link rel="stylesheet" href="search.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.1.1/dist/chart.min.js"></script>
   <script src="//unpkg.com/3d-force-graph"></script>
   <!-- <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script> -->
   <!-- <script src="/node_modules/three/build/three.js"></script> -->
@@ -17,24 +19,53 @@
 
   <div class="parent">
    <header class="pink section">
+     <a href="home.html">
+       <button class="btn" id="btn_home">Home page</button>
+    </a>
+     <button class="btn" id="btn_reset">Reset view</button>
 
-     <button id="btn_reset">Reset view</button>
-     <label for="fname">Filename:</label>
-     <input type="text" id="fname" name="fname">
-     <button id="btn_search" onclick="searchNet()">Search Network</button>
-     <button id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <button  class="btn" id="btn_search" onclick="searchNet()">Search Network</button>
+     <div class="dropdown">
+      <button class="dropbtn" onclick="settingsDropdown()"><i class="fa fa-cog"></i></button>
+      <div id="settingsDropdown" class="dropdown-content">
+
+        <div class="dropped">
+          <label for="fname">Filename:</label>
+          <input type="text" id="fname" name="fname">
+        </div>
+        <!-- <br> -->
+        <div class="dropped">
+          Number of generations:
+          <input type="number" id="generations" name="ngens" min="5" max="200">
+        </div>
+        <!-- <br> -->
+        <div class="dropped">
+          Maximum number of nodes:
+          <br>
+          <input type="number" id="nodes" name="nnodes" min="2" max="120">
+        </div>
+        <button class="dropped" id="customSearchbtn" onclick="customSearch()">Search</button>
+     </div>
+     </div>
+     <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <button class="btn" id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
+     <button class="btn" id="btn_refresh_searches" onclick="get_searches()">Get searches</button>
+    <button class="btn" id="btn_get_search" onclick="get_searches()">Get search status</button>
      <!-- <input type="file" data-buttonText="Open network file"/> -->
+     <hr style="">
+   </header>
+
+   <div id="left" class="left-side blue section" contenteditable>
+     <div id="selectedNodes">
+     </div>
+     <br>
+     <hr>
      <div>
        Currently running searches:
-        <!-- <option selected disabled>Choose here</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
-        <option value="4">Four</option>
-        <option value="5">Five</option> -->
+       <div id="running_searches" style="margin-top:10px;">
+      </div>
     </div>
-   </header>
-   <div id="left" class="left-side blue section" contenteditable></div>
+   </div>
    <div class="maincontain">
      <main id="3d-graph" class="section coral" contenteditable>
 
@@ -55,23 +86,200 @@
 
         </tbody>
     </table>
+    <div id="paretoplotDiv">
+      <canvas id="myChart"></canvas>
+    </div>
    </div>
    <footer class="green section">
-     <a href="home.html">
-       <button id="btn_home">Home page</button>
-    </a>
+
    </footer>
  </div>
 
 
   <script>
+
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+
     var adjacency_matrix =localStorage.getItem("net");
-    console.log(adjacency_matrix);
+    var globalresults = null;
+
+    var selectedDiv = "";
+    var x = document.getElementsByClassName('optionsecoptions')
+    for (var i = 0; i < x.length; i++) {
+        x[i].addEventListener("click", function(){
+
+        var selectedEl = document.querySelector(".selected");
+        if(selectedEl){
+            selectedEl.classList.remove("selected");
+        }
+        this.classList.add("selected");
+
+        }, false);;
+    }
+
+    document.getElementById('btn_get_search').addEventListener('click',function(){
+      var selectedEl = document.querySelector(".selected");
+      if(selectedEl)
+          pollServer(selectedEl.innerText);
+      else
+          alert('please choose an option');
+    })
+
+
+    // console.log(adjacency_matrix);
     if (adjacency_matrix != null){
       var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
       // console.log(graphJson);
       displaygraph(graphJson);
+      // console.log(graphJson);
     }
+
+    // ==================Plotting chart ===============
+
+
+    function get_results_plot(){
+      datalist=[]
+      for (var n of globalresults){
+        datalist.push({x: n[1], y: n[0]})
+      }
+
+      var plotdata = {
+        datasets: [{
+          // label: 'Scatter Dataset',
+          data: datalist,
+          backgroundColor: 'rgb(255, 99, 132)'
+        }],
+      };
+
+      var config = {
+        type: 'scatter',
+        data: plotdata,
+        options: {
+          plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Pareto front'
+            }
+          },
+          scales: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'BNI'
+              },
+              type: 'linear',
+              position: 'bottom'
+            }],
+            yAxes: [{
+              type: 'linear',
+              // position: 'bottom'
+            }]
+          }
+
+        }
+      };
+
+      var myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+      );
+
+      // filename = document.getElementById("fname").value;
+      // var xhttp = new XMLHttpRequest();
+      // xhttp.onreadystatechange = function() {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     console.log("recieved results!");
+      //     console.log(JSON.parse(this.responseText));
+      //
+      //   }
+      // };
+      // var url = "http://127.0.0.1:5000/plot/";
+      // xhttp.open("POST", url, true);
+      // xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      // data = {"filename":filename,
+      //         "results": globalresults,
+      //       };
+      // xhttp.send(JSON.stringify(data));
+    }
+
+    // ------------------Search settings ----------------------
+    function settingsDropdown() {
+      document.getElementById("settingsDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+    function customSearch(){
+      nodes = document.getElementById("nodes").value;
+      generations = document.getElementById("generations").value;
+      filename = document.getElementById("fname").value;
+      date = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
+      date = date.split(", ")[1] +", " + date.split(", ")[0];
+      data = {"filename":(filename+" " + date),
+              "adj_mat": adjacency_matrix,
+              "node_list": [],
+              "n_gens": generations,
+              "max_nodes": nodes
+            };
+      searchNet(data)
+    }
+
+    // ========== Get all searches being run on server ==========================
+    function get_searches(){
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log("recieved search list");
+          // console.log(JSON.parse(this.responseText));
+          res = JSON.parse(JSON.parse(this.responseText));
+          // console.log(this.responseText);
+          console.log(JSON.parse(JSON.parse(this.responseText)));
+          var running_searches = "";
+          res.forEach((val, i) => {
+            var div = "<div class='optionsecoptions'>" + val + "</div>";
+            running_searches = running_searches + div;
+          });
+          console.log(running_searches);
+          document.getElementById("running_searches").innerHTML = running_searches;
+          var x = document.getElementsByClassName('optionsecoptions')
+          for (var i = 0; i < x.length; i++) {
+              x[i].addEventListener("click", function(){
+
+              var selectedEl = document.querySelector(".selected");
+              if(selectedEl){
+                  selectedEl.classList.remove("selected");
+              }
+              this.classList.add("selected");
+
+              }, false);
+          }
+
+        }
+      };
+      var url = "http://127.0.0.1:5000/search/all";
+      xhttp.open("GET", url, true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+      xhttp.send();
+    }
+
+
+
 
     function updateResults(results){
       var res_list = "";
@@ -84,6 +292,7 @@
       gen_num = Object.keys(results)[0];
       res_list = res_list + String(gen_num) + ":<br />"
       results = results[gen_num];
+      globalresults = results;
       console.log(results);
       for (var n of results){
         console.log(n);
@@ -124,10 +333,12 @@
       }
     }
 
-    async function searchNet(){
-      var url = "http://127.0.0.1:5000/search"
+    async function searchNet(data=null){
+      var url = "http://127.0.0.1:5000/search/"
       var xhttp = new XMLHttpRequest();
-      filename = document.getElementById("fname").value;
+      date = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
+      // Time first
+      filename = date.split(", ")[1] +", " + date.split(", ")[0];
       // xhttp.onreadystatechange = function() {
       //   if (this.readyState == 4 && this.status == 200) {
       //     console.log("recieved results!!");
@@ -142,16 +353,17 @@
       xhttp.open("POST", url, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
       // console.log(JSON.stringify({"matfile":data}));
-
-      data = {"filename":filename,
-              "adj_mat": adjacency_matrix,
-              "node_list": [],
-              "n_gens": 30,
-              "max_nodes": 20
-            };
+      if (data == null){
+        data = {"filename":filename,
+                "adj_mat": adjacency_matrix,
+                "node_list": [],
+                "n_gens": 30,
+                "max_nodes": 20
+              };
+      }
       xhttp.send(JSON.stringify(data));
       await sleep(4000)
-      pollServer(filename)
+      pollServer(data.filename)
     }
 
     // TODO openresullts file in another page?
@@ -177,7 +389,7 @@
         let val = String(n.id)+ "<br />"; //+ "<br />"
         node_list = node_list + val;
       }
-      document.getElementById("left").innerHTML = node_list;
+      document.getElementById("selectedNodes").innerHTML = node_list;
     }
 
     function saveNet(){
@@ -206,7 +418,7 @@
       }else{
         var adj =JSON.parse(adjacency);
       }
-      console.log(adj)
+      // console.log(adj)
       adjacency_matrix = adj;
 
       // console.log(adj);
@@ -229,8 +441,8 @@
         });
         i ++;
       });
-      console.log(nodes);
-      console.log(edges);
+      // console.log(nodes);
+      // console.log(edges);
       return {"nodes": nodes, "links": edges};
     }
 
@@ -239,7 +451,7 @@
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           console.log("recieved network!");
-          var graphdata = getGraphData(this.responseText, 0.008);
+          var graphdata = GraphData(this.responseText, 0.008);
           console.log("json==", graphdata);
           // console.log(graphdata.nodes)
           displaygraph(graphdata);
@@ -269,8 +481,8 @@
           // blue = 'rgb(0,0,170,0.7)'
           // red = 'rgb(255,51,51,0.7)'
           // left selected and right normal
-          .height('600') //String(graphHeight))
-          .width('900')  //String(graphWidth))
+          .height(String(window.innerHeight-130)) //600
+          .width(String(window.innerWidth-500))  //900
           .nodeColor(node =>selectedNodes.has(node) ? 'rgb(255,10,10,0.8)': 'rgb(0,0,170,0.7)')
           // .nodeOpacity(1)
           .nodeLabel(d => `<span style="font-size: 170%; color: #01653A; font-weight: bold;">${d.id}</span>`)
