@@ -18,7 +18,7 @@ def plot_pareto_front(data, generations, pop_size, algorithm):
     :param data: a Nx2 matrix, first column is resected nodes, second column SI score.
     :param generations: number of generations used for the search algorithm.
     :param pop_size: population sized used for the search algorithm.
-    :param algorithm: the search algorithm used
+    :param algorithm: the search algorithm used.
     """
     x = [len(data[i, 0]) for i in range(len(data[:, 0]))]
     y = data[:, 1]

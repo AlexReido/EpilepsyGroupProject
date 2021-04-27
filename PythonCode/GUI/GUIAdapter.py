@@ -175,7 +175,7 @@ from PythonCode.ImportIEEG.Import import *
 
 @gui_adapter.post("/ieeg")
 def convertIeeg(item: Item):
-    return json.dumps(get_adjacency(item))
+    return json.dumps(get_adjacency(item.matfile))
 
 
 if __name__ == '__main__':

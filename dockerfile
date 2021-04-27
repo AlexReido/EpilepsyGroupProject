@@ -12,6 +12,6 @@ RUN ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config
 RUN pip install numba --user
 RUN pip install -r app/requirements.txt
 ENV PYTHONPATH "${PYTHONPATH}:/app/"
-WORKDIR /app/PythonCode/TyperCLI
-EXPOSE 8888
-CMD ["python", "/app/PythonCode/TyperCLI/TyperSearch.py"]
+WORKDIR /app/PythonCode/GUI
+EXPOSE 8000
+CMD ["python", "/app/PythonCode/GUI/GUIAdapter.py"]
