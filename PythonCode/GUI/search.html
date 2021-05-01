@@ -22,6 +22,9 @@
      <a href="home.html">
        <button class="btn" id="btn_home"><i class="fa fa-home"></i></button>
     </a>
+    <a id="generate-link" href="generate.html">
+      <button class="btn" id="btn_generate">Generate Network</button>
+    </a>
      <button class="btn" id="btn_reset">Reset view</button>
 
      <button  class="btn" id="btn_search" onclick="searchNet()">Search Network</button>
@@ -314,7 +317,7 @@
       for (var n of array){
         selectedNodes.add(graph.graphData().nodes[n]);
       }
-      
+
       console.log(selectedNodes)
       graph.nodeColor(graph.nodeColor());
     }
