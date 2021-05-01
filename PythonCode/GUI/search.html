@@ -20,7 +20,7 @@
   <div class="parent">
    <header class="pink section">
      <a href="home.html">
-       <button class="btn" id="btn_home">Home page</button>
+       <button class="btn" id="btn_home"><i class="fa fa-home"></i></button>
     </a>
      <button class="btn" id="btn_reset">Reset view</button>
 
@@ -48,34 +48,39 @@
      </div>
      </div>
      <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
-     <button class="btn" id="btn_getPlot" onclick="get_results_plot()">Get plot</button>
-     <button class="btn" id="btn_refresh_searches" onclick="get_searches()">Get searches</button>
-    <button class="btn" id="btn_get_search" onclick="get_searches()">Get search status</button>
+     <!-- <button class="btn" id="btn_getPlot" onclick="get_results_plot()">Get plot</button> -->
+
+    <!-- <button class="btn" id="btn_get_search" onclick="get_searches()">Get search status</button> -->
      <!-- <input type="file" data-buttonText="Open network file"/> -->
      <hr style="">
    </header>
 
    <div id="left" class="left-side blue section" contenteditable>
-     <div id="selectedNodes">
-     </div>
-     <br>
-     <hr>
      <div>
        Currently running searches:
        <div id="running_searches" style="margin-top:10px;">
       </div>
+
     </div>
+    <br>
+      <button id="btn_refresh_searches" onclick="get_searches()">Refresh searches</button>
+     <br>
+     <hr>
+     <div id="selectedNodes">
+     </div>
+
    </div>
+
    <div class="maincontain">
      <main id="3d-graph" class="section coral" contenteditable>
 
      </main>
    </div>
    <div id="right" class="right-side yellow section" contenteditable>
-     <table>
+     <table id="results-table">
         <thead>
             <tr>
-              <th>Results of generation </th>
+              <th colspan="2" id="tabel header">Results of generation </th>
             </tr>
             <tr>
                 <th>The number of nodes resected:</th>
@@ -101,30 +106,35 @@
     console.log(window.innerWidth);
     console.log(window.innerHeight);
 
+    var graph;
+    var selectedNodes;
     var adjacency_matrix =localStorage.getItem("net");
     var globalresults = null;
-
+    var myChart = null;
     var selectedDiv = "";
-    var x = document.getElementsByClassName('optionsecoptions')
-    for (var i = 0; i < x.length; i++) {
-        x[i].addEventListener("click", function(){
+    // var x = document.getElementsByClassName('optionsecoptions')
+    // for (var i = 0; i < x.length; i++) {
+    //     x[i].addEventListener("click", function(){
+    //
+    //     var selectedEl = document.querySelector(".selected");
+    //     pollServer(selectedEl.innerText);
+    //     if(selectedEl){
+    //         selectedEl.classList.remove("selected");
+    //     }
+    //
+    //     this.classList.add("selected");
+    //
+    //     get_results_plot();
+    //     }, false);
+    // }
 
-        var selectedEl = document.querySelector(".selected");
-        if(selectedEl){
-            selectedEl.classList.remove("selected");
-        }
-        this.classList.add("selected");
-
-        }, false);;
-    }
-
-    document.getElementById('btn_get_search').addEventListener('click',function(){
-      var selectedEl = document.querySelector(".selected");
-      if(selectedEl)
-          pollServer(selectedEl.innerText);
-      else
-          alert('please choose an option');
-    })
+    // document.getElementById('btn_get_search').addEventListener('click',function(){
+    //   var selectedEl = document.querySelector(".selected");
+    //   if(selectedEl)
+    //       pollServer(selectedEl.innerText);
+    //   else
+    //       alert('please choose an option');
+    // })
 
 
     // console.log(adjacency_matrix);
@@ -139,9 +149,12 @@
 
 
     function get_results_plot(){
+      if (myChart != null){
+        myChart.destroy()
+      }
       datalist=[]
       for (var n of globalresults){
-        datalist.push({x: n[1], y: n[0]})
+        datalist.push({x: n[0], y: n[1]})
       }
 
       var plotdata = {
@@ -171,11 +184,11 @@
                 display: true,
                 labelString: 'BNI'
               },
-              type: 'linear',
+              // type: 'linear',
               position: 'bottom'
             }],
             yAxes: [{
-              type: 'linear',
+              // type: 'linear',
               // position: 'bottom'
             }]
           }
@@ -183,7 +196,7 @@
         }
       };
 
-      var myChart = new Chart(
+      myChart = new Chart(
         document.getElementById('myChart'),
         config
       );
@@ -262,10 +275,17 @@
               x[i].addEventListener("click", function(){
 
               var selectedEl = document.querySelector(".selected");
+
               if(selectedEl){
                   selectedEl.classList.remove("selected");
               }
+
               this.classList.add("selected");
+              var selEl = document.querySelector(".selected");
+              pollServer(selEl.innerText);
+              // console.log(selEl);
+              // console.log(selEl.innerText);
+              // await sleep(1000);
 
               }, false);
           }
@@ -279,6 +299,29 @@
     }
 
 
+// ================== Results Table =====================================
+    function highlight(e) {
+      if (selected[0]) selected[0].className = '';
+      e.target.parentNode.className = 'selected_res';
+      var s = e.target.parentNode.getAttribute("data-nodelist")
+      console.log(s);
+
+      var array = JSON.parse("[" + s + "]");
+      console.log(array)
+      updateSelectedList(array, raw=true);
+      // var nlist = [];
+      selectedNodes.clear();
+      for (var n of array){
+        selectedNodes.add(graph.graphData().nodes[n]);
+      }
+      
+      console.log(selectedNodes)
+      graph.nodeColor(graph.nodeColor());
+    }
+
+    var table = document.getElementById('results-table'),
+    selected = table.getElementsByClassName('selected_res');
+    table.onclick = highlight;
 
 
     function updateResults(results){
@@ -290,17 +333,21 @@
       // results = JSON.parse(results);
       // console.log(results);
       gen_num = Object.keys(results)[0];
-      res_list = res_list + String(gen_num) + ":<br />"
+      table_header = document.getElementById("tabel header");
+      table_header.innerHTML = "Results of generation: " + String(gen_num)
+
+      // res_list = res_list + String(gen_num) + ":<br />"
       results = results[gen_num];
       globalresults = results;
       console.log(results);
       for (var n of results){
         console.log(n);
-        let val = "<tr> <td> " + n[0] + "</td><td>"+ n[1] + "</td> </tr>"; //+ "<br />"
+        let val = "<tr data-nodelist=\"" + n[2] + "\"> <td> " + n[0] + "</td><td>"+ Math.round(n[1] * 10000) / 10000 + "</td> </tr>"; //+ "<br />"
         console.log(val)
         res_list = res_list + val;
       }
       document.getElementById("table body").innerHTML = res_list;
+      get_results_plot();
     }
 
     function sleep(ms) {
@@ -382,13 +429,22 @@
     //   reader.readAsText(fileopen.files[0])
     // }, false);
 
-    function updateSelectedList(selectedNodes){
+    function updateSelectedList(selectedNodes, raw=false){
       var node_list = "Selected nodes: <br />";
-      for (var n of selectedNodes.values()){
-        console.log(String(n.id));
-        let val = String(n.id)+ "<br />"; //+ "<br />"
-        node_list = node_list + val;
+      if (raw == false) {
+        for (var n of selectedNodes.values()){
+          console.log(String(n.id));
+          let val = String(n.id)+ "<br />"; //+ "<br />"
+          node_list = node_list + val;
+        }
+      } else{
+        for (var n of selectedNodes){
+          console.log(String(n));
+          let val = String(n)+ "<br />"; //+ "<br />"
+          node_list = node_list + val;
+        }
       }
+
       document.getElementById("selectedNodes").innerHTML = node_list;
     }
 
@@ -465,7 +521,7 @@
 
     // var net = getnet();
     function displaygraph(graphData){
-      const selectedNodes = new Set();
+      selectedNodes = new Set();
       updateSelectedList(selectedNodes);
        // const highlightLinks = new Set();
       let hoverNode = null;
@@ -473,7 +529,7 @@
       var graphHeight = graphElem.getBoundingClientRect().height;
       var graphWidth = graphElem.getBoundingClientRect().width;
       console.log(graphHeight)
-      const graph = ForceGraph3D() // should be const
+      graph = ForceGraph3D() // should be const
         (graphElem)
           // .nodeColor(node => 'rgb(255,0,111,1)')
           // pink = 'rgb(255,0,255,0.7)'

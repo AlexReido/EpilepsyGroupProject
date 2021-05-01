@@ -4,6 +4,7 @@
 <head>
   <link rel="stylesheet" href="generate.css">
   <script src="//unpkg.com/3d-force-graph"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <!-- <script src="/node_modules/3d-force-graph/dist/3d-force-graph.js"></script> -->
   <!-- <script src="/node_modules/three/build/three.js"></script> -->
   <!-- <script src="/node_modules/JQuery/lib/node-jquery.js"></script> -->
@@ -18,19 +19,52 @@
 
   <div class="parent">
    <header class="pink section">
-     <button id="btn_loadnet" onclick="getnet()">Load default network</button>
-     <button id="btn_loadart" onclick="getArtificial()">Generate artificial</button>
+     <a href="home.html">
+       <button class="btn" id="btn_home"><i class="fa fa-home"></i></button>
+    </a>
+     <button class="btn" id="btn_loadnet" onclick="getnet()">Load default network</button>
+
+     <button class="btn" id="btn_loadart" onclick="getArt()">Generate artificial</button>
+     <div class="dropdown">
+      <button class="dropbtn" onclick="settingsDropdown()"><i class="fa fa-cog"></i></button>
+      <div id="settingsDropdown" class="dropdown-content">
+
+        <br>
+        <div class="dropped">
+          Number of nodes:
+          <input type="number" id="nodes" name="nnodes" min="10" max="60">
+        </div>
+        <br>
+
+        <div class="dropped">
+          Number of edges:
+          <br>
+          <input type="number" id="edges" name="nedges" min="20" max="120">
+        </div>
+
+        <br>
+        <button class="dropped" id="customGeneratebtn" onclick="customGenerate()">Generate</button>
+     </div>
+     </div>
+<!--
+
+
      Number of nodes:
      <input type="number" id="nodes" name="nnodes" min="10" max="60">
      Number of edges:
-     <input type="number" id="edges" name="nedges" min="20" max="120">
+     <input type="number" id="edges" name="nedges" min="20" max="120"> -->
 
-     <button id="btn_reset">Reset view</button>
-     <button id="btn_saveNet" onclick="saveNetwork()">Save network</button>
+
+
+
+     <button class="btn" id="btn_reset">Reset view</button>
+     <button class="btn" id="btn_saveNet" onclick="saveNetwork()">Save network</button>
      <input type="file" data-buttonText="Open network file"/>
      <a id="search_link" href="search.html">
-       <button id="btn_search">Search Network</button>
+       <button class="btn" id="btn_search">Search Network</button>
      </a>
+
+     <hr style="">
    </header>
    <div id="left" class="left-side blue section" contenteditable></div>
    <div class="maincontain">
@@ -43,9 +77,7 @@
    </div>
    <div class="right-side yellow section" contenteditable></div>
    <footer class="green section">
-     <a href="home.html">
-       <button id="btn_home">Home page</button>
-    </a>
+
    </footer>
  </div>
 
@@ -75,6 +107,27 @@
         node_list = node_list + val;
       }
       document.getElementById("left").innerHTML = node_list;
+    }
+
+    // ===================== Generate artificial network ======================
+    function customGenerate(){
+      nodes = document.getElementById("nodes").value;
+      edges = document.getElementById("edges").value;
+      console.log(nodes);
+      console.log(edges);
+      let extraparam = ""
+      if (nodes !== null) {
+        extraparam = extraparam + "&nodes=" + nodes.toString()
+      }
+      if (edges !== null) {
+        extraparam = extraparam + "&edges=" + edges.toString()
+      }
+      getnet('?artificial=True'+ extraparam);
+    }
+
+    function getArt(){
+      getnet('?artificial=True');
+
     }
 
     // function downloadBlob(blob, name = 'file.txt') {
@@ -192,8 +245,8 @@
           // blue = 'rgb(0,0,170,0.7)'
           // red = 'rgb(255,51,51,0.7)'
           // left selected and right normal
-          .height('600') //String(graphHeight))
-          .width('900')  //String(graphWidth))
+          .height(String(window.innerHeight-130)) //600
+          .width(String(window.innerWidth-500)) //900
           .nodeColor(node =>selectedNodes.has(node) ? 'rgb(255,10,10,0.8)': 'rgb(0,0,170,0.7)')
           // .nodeOpacity(1)
           .nodeLabel(d => `<span style="font-size: 170%; color: #01653A; font-weight: bold;">${d.id}</span>`)
@@ -246,21 +299,7 @@
 
     }
 
-    function getart(){
 
-      nodes = document.getElementById("nodes").value;
-      edges = document.getElementById("edges").value;
-      console.log(nodes);
-      console.log(edges);
-      let extraparam = ""
-      if (nodes !== null) {
-        extraparam = extraparam + "&nodes=" + nodes.toString()
-      }
-      if (edges !== null) {
-        extraparam = extraparam + "&edges=" + edges.toString()
-      }
-      getnet('?artificial=True'+ extraparam);
-    }
 
     // const openNet = document.querySelector('input[type="file"]')
     // openNet.addEventListener('change', function(e) {
