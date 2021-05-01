@@ -115,16 +115,13 @@ class SearchThread():
         # current error is that the client refuses as we aren't listening from the js
         # TODO maybe easier just to poll from client
 
-@gui_adapter.get("/search/all")
-def getAllSearches():
-    """:returns all of the previous search requests"""
-    searches = []
-    for search in searchThreads:
-        searches.append(search.config.filename)
-
-    print(searches)
-    print(searchThreads)
-    return json.dumps(searches)
+# @gui_adapter.get("/search/")
+# def getAllSearches():
+#     """:returns all of the previous search requests"""
+#     searches = []
+#     for search in searchThreads:
+#         searches.append(search.config.filename)
+#     return json.dumps(searches)
 
 
 @gui_adapter.get("/search/")
@@ -173,26 +170,12 @@ class Item(BaseModel):
     matfile: str
 
 
-class Result(BaseModel):
-    filename: str
-    results: list
-
-
-
 from PythonCode.ImportIEEG.Import import *
 
 
 @gui_adapter.post("/ieeg")
 def convertIeeg(item: Item):
     return json.dumps(get_adjacency(item.matfile))
-
-from PythonCode.Search.display_results import plot_pareto_front
-
-@gui_adapter.post("/plot")
-def getPlot(result: Result):
-    print(result.results)
-    return json.dumps(plot_pareto_front(result.results))
-
 
 
 if __name__ == '__main__':

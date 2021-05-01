@@ -27,6 +27,7 @@ def get_adjacency(data):
     adj = convert(io.loadmat('..\\resources\\curr_network.mat'), 'data')
     return adj
 
+
 if __name__ == "__main__":
     data = []
     get_adjacency(data)

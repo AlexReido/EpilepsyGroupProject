@@ -7,3 +7,5 @@ typer~=0.3.2
 uvicorn~=0.13.3
 requests~=2.24.0
 matlab~=0.1
+bctpy~=0.5.2
+pandas~=1.2.3
