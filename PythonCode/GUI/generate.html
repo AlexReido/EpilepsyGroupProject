@@ -58,7 +58,7 @@
 
 
      <button class="btn" id="btn_reset">Reset view</button>
-     <button class="btn" id="btn_saveNet" onclick="saveNetwork()">Save network</button>
+     <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
      <input type="file" data-buttonText="Open network file"/>
      <a id="search_link" href="search.html">
        <button class="btn" id="btn_search">Search Network</button>
@@ -175,7 +175,7 @@
     }
 
     function getGraphData(adjacency, linkthreshold, json = true){
-      // console.log(adjacency)
+      console.log(adjacency)
       if (json ==  true){
         var adj = JSON.parse(JSON.parse(adjacency));
       }else{

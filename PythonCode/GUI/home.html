@@ -4,7 +4,24 @@
   <title>ESP</title>
   <!-- <link rel="stylesheet" type="text/css" href="home.css"> -->
 <style>
-  #parent {
+.btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+hr {
+  border-top: 2px solid grey;
+}
+
+.text-content {
+  padding: 14px;
+  /* border: 2px solid grey; */
+  width: 700px;
+}
+  /* #parent {
     height: 300px;
     display: grid;
     grid-gap: 3rem;
@@ -14,35 +31,43 @@
   #box {
     flex: 1 1 890px; /*  Stretching: */
     /* flex: 0 1 150px; /*  No stretching: */ */
-    margin: 30px;
+    /* margin: 30px;
     /* place-items: center; */
-    background-color: #ABBAEA;
+    /* background-color: #ABBAEA;
     display: grid;
     place-items: center;
-  }
+  } */
 </style>
 </head>
 <body>
-<div id="parent">
+  <title>Epilepsy Surgery Planning tool</title>
+
 
   <a id="box" href="generate.html">
-    <div>Generate artificial network</div>
+    <button class="btn">Generate artificial network</button>
   </a>
   <a id="box" href="import.html">
-    <div id="box"><div>Import iEEG</div></div>
+    <button class="btn">Import iEEG</button>
   </a>
   <a id="box" href="search.html">
-    <div>Search network</div>
-
-    <!-- <a href="opennet.html">
-      <p>Open network</p>
-    </a>
-    <a href="openres.html">
-      <p>Open results</p>
-    </a> -->
+    <button class="btn">Search network</button>
   </a>
+<hr>
+<div class="text-content">
+  <h1 style="text-shadow: 1px 1px 1px gray,2px 2px 1px gray; font-size: 3rem;">Epilepsy Surgery Planning tool</h1>
+  This tool is for the purpose of aiding in the research
+  of identifying optimal resection sites in epilepsy surgery.
+  In addition this software aims to provide the basis for a tool which could be used by clinicians.
+
+  Mathematical models evaluate prospective epilepsy surgical resection in silico.
+  A genetic search algorithm is used to exploit this model and identify the optimal nodes to select for resection.
+
+
+  <br>
+  <br>
+  This software is open source under the .... license. Please consider contributing.
 </div>
-</div>
+
 <script>
   localStorage.setItem("net", null);
 
