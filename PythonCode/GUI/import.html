@@ -2,32 +2,108 @@
 <html lang="en">
 <head>
   <title>ESP</title>
-  <!-- <link rel="stylesheet" type="text/css" href="home.css"> -->
-<style>
+  <link rel="stylesheet" href="import.css">
+  <script src="//unpkg.com/3d-force-graph"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-</style>
+  <!-- <link rel="stylesheet" type="text/css" href="home.css"> -->
+
 </head>
 <body>
-<input type="file" data-buttonText="Open network file"/>
 
+
+  <div class="parent">
+   <header class="pink section">
+     <a href="home.html">
+       <button class="btn" id="btn_home"><i class="fa fa-home"></i></button>
+    </a>
+
+     <input type="file" data-buttonText="Open network file"/>
+     <button class="btn" id="btn_reset">Reset view</button>
+     <button class="btn" id="btn_saveNet" onclick="saveNet()">Save network</button>
+     <a id="search_link" href="search.html">
+       <button class="btn" id="btn_search">Search Network</button>
+     </a>
+
+     <hr style="">
+   </header>
+   <div id="left" class="left-side blue section" contenteditable></div>
+   <div class="maincontain">
+     <main id="3d-graph" class="section coral" contenteditable>
+       <!-- <div >
+         < <div style="position: absolute;"> -->
+       <!-- The text to be added, will be written here! :) -->
+       <!-- </div> --> -->
+     </main>
+   </div>
+   <div class="right-side yellow section" contenteditable></div>
+   <footer class="green section">
+
+   </footer>
+  </div>
 <script>
   localStorage.setItem("net", null);
 
   const fileopen = document.querySelector('input[type="file"]')
-
   function onRecievefromServer(){
     console.log("read in= ", adjacency_matrix);
-    var graphJson =  getGraphData(adjacency_matrix, 0.008, false);
-
-    localStorage.setItem("net", graphJson);
+    var graphJson =  getGraphData(adjacency_matrix, 0.18);
+    displaygraph(graphdata);
+    // localStorage.setItem("net", graphJson);
     // TODO GOTO SEARch
+  }
+
+  function getGraphData(adjacency, linkthreshold, json = true){
+    console.log(adjacency)
+    if (json ==  true){
+      var adj = JSON.parse(JSON.parse(adjacency));
+    }else{
+      var adj =JSON.parse(adjacency);
+    }
+    // console.log(adj)
+    adjacency_matrix = adj;
+    // document.getElementById("search_link").setAttribute("href","search.html & net="+adjacency_matrix);
+    localStorage.setItem("net", JSON.stringify(adjacency_matrix));
+    // console.log(adj);
+    // console.log(typeof adj);
+    // const adjacency = adjacency
+    nodes = [];
+    edges = [];
+    adjacency_matrix.forEach(function (row, i) {
+      // console.log(i)
+      nodes.push({"id": i});
+      row.forEach(function (link, j) {
+        // console.log(i, j)
+        if (link > linkthreshold){
+          edges.push({
+            "source": i,
+            "target" : j,
+            "val" : link,
+          });
+        }
+      });
+      i ++;
+    });
+    // console.log(nodes);
+    // console.log(edges);
+    return {"nodes": nodes, "links": edges};
   }
 
   function sendMattoServer(data){
     var url = "http://127.0.0.1:5000/ieeg"
     var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // console.log("recieved network!");
+        console.log("read in= ", this.responseText);
+        var graphdata =  getGraphData(this.responseText, 0.008);
+        displaygraph(graphdata);
+        // localStorage.setItem("net", graphJson);
+        // TODO GOTO SEARch
+      }
+    };
     xhttp.open("POST", url, true);
-    xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=UTF-8');
+    xhttp.setRequestHeader("Access-Control-Allow-Origin",'application/json; charset=ISO-8859-1');
     // console.log(JSON.stringify({"matfile":data}));
     xhttp.send(JSON.stringify({"matfile":data}));
   }
@@ -42,9 +118,91 @@
       sendMattoServer(matlabData);
 
     }
-    reader.readAsText(fileopen.files[0]);
+    reader.readAsBinaryString(fileopen.files[0]);
+    // readAsBinaryString
+    //readAsText
   }, false);
 
+
+  function displaygraph(graphData){
+    const selectedNodes = new Set();
+    updateSelectedList(selectedNodes);
+     // const highlightLinks = new Set();
+    let hoverNode = null;
+    var graphElem = document.getElementById('3d-graph');
+    var graphHeight = graphElem.getBoundingClientRect().height;
+    var graphWidth = graphElem.getBoundingClientRect().width;
+    console.log(graphHeight)
+    const graph = ForceGraph3D() // should be const
+      (graphElem)
+        // .nodeColor(node => 'rgb(255,0,111,1)')
+        // pink = 'rgb(255,0,255,0.7)'
+        // orange = 'rgba(219,131,16,0.7)'
+        // blue = 'rgb(0,0,170,0.7)'
+        // red = 'rgb(255,51,51,0.7)'
+        // left selected and right normal
+        .height(String(window.innerHeight-130)) //600
+        .width(String(window.innerWidth-500)) //900
+        .nodeColor(node =>selectedNodes.has(node) ? 'rgb(255,10,10,0.8)': 'rgb(0,0,170,0.7)')
+        // .nodeOpacity(1)
+        .nodeLabel(d => `<span style="font-size: 170%; color: #01653A; font-weight: bold;">${d.id}</span>`)
+        // .onNodeHover(node => elem.style.cursor = node ? 'pointer' : null)
+        // .nodeThreeObject(node => {
+        //   const sprite = new SpriteText(node.id);
+        //   sprite.material.depthWrite = false; // make sprite background transparent
+        //   sprite.color = node.color;
+        //   sprite.textHeight = 8;
+        //   return sprite;
+        // })
+        .enableNodeDrag(false)
+        // purple 'rgba(124,21,65,1)'
+        .linkColor(link => 'rgba(30,30,30,0.3)')
+        // link width is very slow
+        // .linkWidth(0.5)
+        .linkOpacity(1)
+        // .width(1200)
+        // .height(800)
+        .onNodeClick((node, event) => {
+            if (event.ctrlKey || event.shiftKey || event.altKey) { // multi-selection
+              selectedNodes.has(node) ? selectedNodes.delete(node) : selectedNodes.add(node);
+            } else { // single-selection
+              const untoggle = selectedNodes.has(node) && selectedNodes.size === 1;
+              selectedNodes.clear();
+              !untoggle && selectedNodes.add(node);
+            }
+            graph.nodeColor(graph.nodeColor()); // update color of selected nodes
+            updateSelectedList(selectedNodes);
+        })
+        .graphData(graphData);
+    graph.renderer().setClearColor( 0x000000, 0 );
+    graph.backgroundColor('#FFFFFF');
+
+    function updateHighlight() {
+      // trigger update of highlighted objects in scene
+      graph
+        .nodeColor(graph.nodeColor())
+        // .linkWidth(Graph.linkWidth())
+        // .linkDirectionalParticles(Graph.linkDirectionalParticles());
+    }
+    function resetView() {
+      graph.zoomToFit(400)
+      // graph.onEngineStop(() => );
+    }
+    var button = document.getElementById("btn_reset");
+    button.onclick = function(){resetView()};
+
+    var element = document.getElementById('3d-graph')
+
+  }
+  function updateSelectedList(selectedNodes){
+    var node_list = "Selected nodes: <br />";
+    for (var n of selectedNodes.values()){
+      console.log(String(n.id));
+      let val = String(n.id)+ "<br />"; //+ "<br />"
+      node_list = node_list + val;
+    }
+    document.getElementById("left").innerHTML = node_list;
+  }
 
 </script>
 </body>

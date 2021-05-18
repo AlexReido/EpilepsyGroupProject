@@ -1,7 +1,7 @@
 from scipy import io
 import numpy as np
 import pandas as pd
-
+import codecs
 
 def calc_adjMatrix(iEEG):
     df = pd.DataFrame(iEEG)
@@ -21,10 +21,18 @@ def convert(mat_contents, var):
 def get_adjacency(data):
     """ Converts string from matlab file
         :returns the adjacency matrix as a numpy array"""
-    f = open("..\\resources\\curr_network.mat", "w")
+    # data = bytes(data, 'iso-8859-1') # utf-8
+    print(type(data))
+
+    # print(data)
+    f = codecs.open("..\\resources\\curr_network.mat", "w", "ISO-8859-1")
+
+    # f = open("..\\resources\\curr_network.mat", "wb")
     f.write(data)
     f.close()
-    adj = convert(io.loadmat('..\\resources\\curr_network.mat'), 'data')
+    matobj = io.loadmat('..\\resources\\curr_network.mat')
+    adj = convert(matobj, 'data')
+    print("adjacency ", adj)
     return adj
 
 
