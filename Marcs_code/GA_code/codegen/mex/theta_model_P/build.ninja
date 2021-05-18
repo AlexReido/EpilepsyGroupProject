@@ -1,31 +1,31 @@
-# CompilerName=msvc160
+# CompilerName=mingw64
 # Mode=optim
 ninja_required_version = 1.3
 
 # Basic folders
 root = .
-builddir = $root\build\win64
-matlabdir = C:\Program Files\MATLAB\R2020a
-startdir = C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code
+builddir = $root/build/win64
+matlabdir = C:/Program Files/MATLAB/R2020a
+startdir = C:/Users/Luke/Documents/Computer Science/Year 4/Group Project/EpilepsyGroupProject/Marcs_code/GA_code
 
 # Toolchain information
-cc = cl
-cxx = cl
-linker = link
-linkerxx = link
+cc = C:\ProgramData\MATLAB\SupportPackages\R2020a\3P.instrset\mingw_w64.instrset\bin\gcc
+cxx = C:\ProgramData\MATLAB\SupportPackages\R2020a\3P.instrset\mingw_w64.instrset\bin\g++
+linker = C:\ProgramData\MATLAB\SupportPackages\R2020a\3P.instrset\mingw_w64.instrset\bin\gcc
+linkerxx = C:\ProgramData\MATLAB\SupportPackages\R2020a\3P.instrset\mingw_w64.instrset\bin\g++
 
-cflags =  /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex /openmp /wd4101 
+cflags =  -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\codegen\mex\theta_model_P" -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code" -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\codegen\mex\theta_model_P\interface" -I "C:\Program Files\MATLAB\R2020a\extern\include" -I "." -DMODEL=theta_model_P_mex -D__USE_MINGW_ANSI_STDIO=1  
 
-cxxflags =   /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DMODEL=theta_model_P_mex /openmp /wd4101 
+cxxflags =  -c -fexceptions -fno-omit-frame-pointer -std=c++11 -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c++11 -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\codegen\mex\theta_model_P" -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code" -I "C:\Users\Luke\Documents\Computer Science\Year 4\Group Project\EpilepsyGroupProject\Marcs_code\GA_code\codegen\mex\theta_model_P\interface" -I "C:\Program Files\MATLAB\R2020a\extern\include" -I "." -DMODEL=theta_model_P_mex -D__USE_MINGW_ANSI_STDIO=1  
 
-ldflags =  /nologo /manifest   /DLL /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmx.lib libmex.lib libmat.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  /out:"theta_model_P_mex.mexw64" /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmwblas.lib libemlrt.lib libcovrt.lib libut.lib libmwmathutil.lib libiomp5md.lib /nodefaultlib:vcomp /LIBPATH:"$matlabdir\bin\win64" /export:mexFunction /export:mexfilerequiredapiversion /export:emlrtMexFcnProperties /export:theta_model_P_initialize /export:theta_model_P_terminate /export:theta_model_P_atexit /export:theta_model_P /export:emlrtGetRootTLSGlobal /export:emlrtLockerFunction /export:emxEnsureCapacity_real_T /export:emxEnsureCapacity_boolean_T /export:emxEnsureCapacity_int32_T /export:emxInit_real_T /export:emxFree_real_T /export:emxInit_boolean_T /export:emxFree_boolean_T /export:emxInit_int32_T /export:emxFree_int32_T
+ldflags =  -m64 -Wl,--no-undefined -shared -static -L"C:\Program Files\MATLAB\R2020a\extern\lib\win64\mingw64" -llibmx -llibmex -llibmat -lm -llibmwlapack -llibmwblas -o "theta_model_P_mex.mexw64" -L"$matlabdir\extern\lib\win64\mingw64" -llibmwblas -llibemlrt -llibcovrt -llibut -llibmwmathutil  -Wl,--version-script,theta_model_P_mex.map
 
 # Build Rules
 rule cc
-    command = $cc $cflags $in /Fo$out
+    command = $cc $cflags $in -o $out
 
 rule cxx
-    command = $cxx $cxxflags $in /Fo$out
+    command = $cxx $cxxflags $in -o $out
 
 rule link
     command = $linker @$out.rsp $ldflags
@@ -36,27 +36,20 @@ rule linkxx
     command = $linkerxx $in $ldflags
 
 # Build
-build $builddir\rt_nonfinite.obj : cc $root\rt_nonfinite.c
-build $builddir\theta_model_P_mexutil.obj : cc $root\theta_model_P_mexutil.c
-build $builddir\theta_model_P_data.obj : cc $root\theta_model_P_data.c
-build $builddir\theta_model_P_initialize.obj : cc $root\theta_model_P_initialize.c
-build $builddir\theta_model_P_terminate.obj : cc $root\theta_model_P_terminate.c
-build $builddir\theta_model_P.obj : cc $root\theta_model_P.c
-build $builddir\rand.obj : cc $root\rand.c
-build $builddir\eml_rand.obj : cc $root\eml_rand.c
-build $builddir\eml_rand_mcg16807_stateful.obj : cc $root\eml_rand_mcg16807_stateful.c
-build $builddir\eml_rand_shr3cong_stateful.obj : cc $root\eml_rand_shr3cong_stateful.c
-build $builddir\eml_rand_mt19937ar_stateful.obj : cc $root\eml_rand_mt19937ar_stateful.c
-build $builddir\applyScalarFunction.obj : cc $root\applyScalarFunction.c
-build $builddir\log2.obj : cc $root\log2.c
-build $builddir\mtimes.obj : cc $root\mtimes.c
-build $builddir\indexShapeCheck.obj : cc $root\indexShapeCheck.c
-build $builddir\nullAssignment.obj : cc $root\nullAssignment.c
-build $builddir\_coder_theta_model_P_api.obj : cc $root\interface\_coder_theta_model_P_api.c
-build $builddir\_coder_theta_model_P_mex.obj : cc $root\interface\_coder_theta_model_P_mex.c
-build $builddir\theta_model_P_emxutil.obj : cc $root\theta_model_P_emxutil.c
-build $builddir\_coder_theta_model_P_info.obj : cc $root\interface\_coder_theta_model_P_info.c
-build $builddir\c_mexapi_version.obj : cc $matlabdir\extern\version\c_mexapi_version.c
+build $builddir/rt_nonfinite.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/rt_nonfinite.c
+build $builddir/theta_model_P_data.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/theta_model_P_data.c
+build $builddir/theta_model_P_initialize.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/theta_model_P_initialize.c
+build $builddir/theta_model_P_terminate.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/theta_model_P_terminate.c
+build $builddir/theta_model_P.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/theta_model_P.c
+build $builddir/randn.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/randn.c
+build $builddir/mtimes.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/mtimes.c
+build $builddir/indexShapeCheck.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/indexShapeCheck.c
+build $builddir/nullAssignment.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/nullAssignment.c
+build $builddir/_coder_theta_model_P_api.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/interface/_coder_theta_model_P_api.c
+build $builddir/_coder_theta_model_P_mex.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/interface/_coder_theta_model_P_mex.c
+build $builddir/theta_model_P_emxutil.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/theta_model_P_emxutil.c
+build $builddir/_coder_theta_model_P_info.o : cc C$:/Users/Luke/Documents/Computer$ Science/Year$ 4/Group$ Project/EpilepsyGroupProject/Marcs_code/GA_code/codegen/mex/theta_model_P/interface/_coder_theta_model_P_info.c
+build $builddir/c_mexapi_version.o : cc C$:/Program$ Files/MATLAB/R2020a/extern/version/c_mexapi_version.c
 
 # Link
-build $root\theta_model_P_mex.mexw64 : link $builddir\rt_nonfinite.obj $builddir\theta_model_P_mexutil.obj $builddir\theta_model_P_data.obj $builddir\theta_model_P_initialize.obj $builddir\theta_model_P_terminate.obj $builddir\theta_model_P.obj $builddir\rand.obj $builddir\eml_rand.obj $builddir\eml_rand_mcg16807_stateful.obj $builddir\eml_rand_shr3cong_stateful.obj $builddir\eml_rand_mt19937ar_stateful.obj $builddir\applyScalarFunction.obj $builddir\log2.obj $builddir\mtimes.obj $builddir\indexShapeCheck.obj $builddir\nullAssignment.obj $builddir\_coder_theta_model_P_api.obj $builddir\_coder_theta_model_P_mex.obj $builddir\theta_model_P_emxutil.obj $builddir\_coder_theta_model_P_info.obj $builddir\c_mexapi_version.obj 
+build $root\theta_model_P_mex.mexw64 : link $builddir\rt_nonfinite.o $builddir\theta_model_P_data.o $builddir\theta_model_P_initialize.o $builddir\theta_model_P_terminate.o $builddir\theta_model_P.o $builddir\randn.o $builddir\mtimes.o $builddir\indexShapeCheck.o $builddir\nullAssignment.o $builddir\_coder_theta_model_P_api.o $builddir\_coder_theta_model_P_mex.o $builddir\theta_model_P_emxutil.o $builddir\_coder_theta_model_P_info.o $builddir\c_mexapi_version.o 

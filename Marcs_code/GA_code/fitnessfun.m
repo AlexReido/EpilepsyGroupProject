@@ -39,7 +39,6 @@ function y = fitnessfun(x, w, net)
 % @copyright: Not specified
 
 %% Prepare support data structures
-datetime('now')
 
 %count the number of individuals
 pop_size = size(x,1);
@@ -54,7 +53,7 @@ y1 = ones(pop_size,1);
 y2 = ones(pop_size,1);
 
 %% Calculate the fitness for each individual
-for count_indiv = 1:pop_size
+parfor count_indiv = 1:pop_size
     individ = x(count_indiv,:);
     
     %1st objective function : number of resections
@@ -64,15 +63,11 @@ for count_indiv = 1:pop_size
     %we put 1-DeltaBNI because the algorithm minimizes the obejctive functions)
     y2(count_indiv) = 1-DeltaBNI_r_dir(y1(count_indiv), individ,w,net); 
 
-    
-    
 end
 
 %% Set values to the return value
 y(:,1) = y1;
 y(:,2) = y2;
-
-datetime('now')
 
 end
 

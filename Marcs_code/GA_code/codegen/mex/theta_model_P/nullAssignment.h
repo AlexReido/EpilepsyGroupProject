@@ -19,7 +19,6 @@
 #include "mex.h"
 #include "emlrt.h"
 #include "rtwtypes.h"
-#include "omp.h"
 #include "theta_model_P_types.h"
 
 /* Function Declarations */
