@@ -44,20 +44,19 @@ main {
 .maincontain {
   grid-column: 2 / 3;
 }
-.right-side {
-  padding: 2rem;
-  grid-column: 3 / 4;
-  float: right;
-  text-align: right;
-}
+
 
 footer {
   grid-column: 1 / 4;
 }
 
+#btn_refresh_searches {
+  margin: 5px;
+}
+
 .optionsecoptions
     {
-    width: 200px;
+    min-width: 200px;
     padding-left:10px;
     padding-right:10px;
     /* height: 40px; */
@@ -102,11 +101,39 @@ footer {
   font-size: 16px;
   border: none;
 }
+/* ======================== Right side  ===========================*/
+.right-side {
+  padding: 5px;
+  grid-column: 3 / 4;
+  float: right;
+  /* max-width: 200px; */
+  /* text-align: right; */
+}
 
+/* ======================== Table  ================================*/
+#results-table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  /* width: 100%; */
+  max-width: 200px;
+  text-align: left;
+}
+th {
+  background-color: #37cc95;
+}
 
+td, th {
+  border: 1px solid #608779;
+  padding: 3px;
+}
+
+.selected_res{
+  background-color: brown;
+  color: #FFF;
+}
 /* ======================== plot pareto front ===========================*/
 #paretoplotDiv {
-  max-width: 300px;
+  /* max-width: 200px; */
 }
 
 
