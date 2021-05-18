@@ -19,7 +19,7 @@ app.get('/', function (request, response) {
   });
 })
 app.use(express.static(__dirname));
-app.listen(1337, "127.0.0.1")
+app.listen(8080, "0.0.0.0")
 
 
 // http.createServer(function(request, response) {

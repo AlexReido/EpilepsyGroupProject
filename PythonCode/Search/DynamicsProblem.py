@@ -12,7 +12,6 @@ class DynamicsProblem(Problem):
         self.w = coupling_value
         self.net = network
         self.t = timesteps
-        self.seed = 1337
 
     def _evaluate(self, X, out, *args, **kwargs):
         y = fitness_function(X, self.w, self.net, self.t)  # self.seed

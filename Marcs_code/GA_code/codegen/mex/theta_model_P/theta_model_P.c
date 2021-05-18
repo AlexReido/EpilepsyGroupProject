@@ -11,12 +11,11 @@
 
 /* Include files */
 #include "theta_model_P.h"
-#include "applyScalarFunction.h"
 #include "indexShapeCheck.h"
 #include "mtimes.h"
 #include "mwmathutil.h"
 #include "nullAssignment.h"
-#include "rand.h"
+#include "randn.h"
 #include "rt_nonfinite.h"
 #include "theta_model_P_data.h"
 #include "theta_model_P_emxutil.h"
@@ -48,52 +47,32 @@ static emlrtRSInfo e_emlrtRSI = { 82,  /* lineNo */
   "C:\\Users\\Luke\\Documents\\Computer Science\\Year 4\\Group Project\\EpilepsyGroupProject\\Marcs_code\\GA_code\\theta_model_P.m"/* pathName */
 };
 
-static emlrtRSInfo f_emlrtRSI = { 4,   /* lineNo */
-  "randn2",                            /* fcnName */
-  "C:\\Users\\Luke\\Documents\\Computer Science\\Year 4\\Group Project\\EpilepsyGroupProject\\Marcs_code\\GA_code\\randn2.m"/* pathName */
-};
-
-static emlrtRSInfo g_emlrtRSI = { 5,   /* lineNo */
-  "randn2",                            /* fcnName */
-  "C:\\Users\\Luke\\Documents\\Computer Science\\Year 4\\Group Project\\EpilepsyGroupProject\\Marcs_code\\GA_code\\randn2.m"/* pathName */
-};
-
-static emlrtRSInfo h_emlrtRSI = { 9,   /* lineNo */
-  "erfinv",                            /* fcnName */
-  "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\specfun\\erfinv.m"/* pathName */
-};
-
-static emlrtRSInfo i_emlrtRSI = { 21,  /* lineNo */
-  "eml_erfcore",                       /* fcnName */
-  "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\specfun\\private\\eml_erfcore.m"/* pathName */
-};
-
-static emlrtRSInfo eb_emlrtRSI = { 79, /* lineNo */
+static emlrtRSInfo f_emlrtRSI = { 79,  /* lineNo */
   "eml_mtimes_helper",                 /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\ops\\eml_mtimes_helper.m"/* pathName */
 };
 
-static emlrtRSInfo fb_emlrtRSI = { 48, /* lineNo */
+static emlrtRSInfo g_emlrtRSI = { 48,  /* lineNo */
   "eml_mtimes_helper",                 /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\ops\\eml_mtimes_helper.m"/* pathName */
 };
 
-static emlrtRSInfo ib_emlrtRSI = { 41, /* lineNo */
+static emlrtRSInfo j_emlrtRSI = { 41,  /* lineNo */
   "find",                              /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\elmat\\find.m"/* pathName */
 };
 
-static emlrtRSInfo jb_emlrtRSI = { 153,/* lineNo */
+static emlrtRSInfo k_emlrtRSI = { 153, /* lineNo */
   "eml_find",                          /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\lib\\matlab\\elmat\\find.m"/* pathName */
 };
 
-static emlrtRSInfo mb_emlrtRSI = { 22, /* lineNo */
+static emlrtRSInfo n_emlrtRSI = { 22,  /* lineNo */
   "nullAssignment",                    /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\eml\\+coder\\+internal\\nullAssignment.m"/* pathName */
 };
 
-static emlrtRSInfo nb_emlrtRSI = { 26, /* lineNo */
+static emlrtRSInfo o_emlrtRSI = { 26,  /* lineNo */
   "nullAssignment",                    /* fcnName */
   "C:\\Program Files\\MATLAB\\R2020a\\toolbox\\eml\\eml\\+coder\\+internal\\nullAssignment.m"/* pathName */
 };
@@ -336,33 +315,30 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
   boolean_T exitg1;
   boolean_T b_p;
   real_T theta_old_data[130];
+  int32_T x_size[1];
   int32_T tmp_size[2];
   int32_T idx;
+  real_T I_data[130];
+  int32_T I_size[1];
   emxArray_real_T *seizure_index;
-  real_T y_data[130];
-  int32_T y_size[1];
   emxArray_int32_T *ii;
   emxArray_int32_T *b_idx;
   int32_T node;
-  real_T I_data[130];
-  int32_T I_size[1];
   real_T s_data[130];
-  int32_T i1;
+  real_T x_data[130];
   real_T tmp_data[130];
+  int32_T i1;
   int32_T b_BNI[2];
   boolean_T b_tmp_data[130];
   emlrtStack st;
   emlrtStack b_st;
   emlrtStack c_st;
-  emlrtStack d_st;
   st.prev = sp;
   st.tls = sp->tls;
   b_st.prev = &st;
   b_st.tls = st.tls;
   c_st.prev = &b_st;
   c_st.tls = b_st.tls;
-  d_st.prev = &c_st;
-  d_st.tls = c_st.tls;
   emlrtHeapReferenceStackEnterFcnR2012b(sp);
 
   /* This function calculates BNI. This function is slightely modified from the */
@@ -378,7 +354,6 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
   /* rng('shuffle');it is not supported for the convertion to the mex files */
   /*  Fixed parameters: */
   /*  time steps */
-  /* T = 4000; */
   /*  distance to SNIC */
   /*  noise level */
   /*  time step for the integration */
@@ -469,26 +444,15 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
   /*  initial condition   */
   /* rng(1337) */
   /*  Compute time series */
+  x_size[0] = nx;
   tmp_size[0] = 1;
   tmp_size[1] = nx;
   for (idx = 0; idx < 3999999; idx++) {
     st.site = &b_emlrtRSI;
-
-    /*  randn2  Calls rand and applies inverse transform sampling to the output. */
-    b_st.site = &f_emlrtRSI;
-    b_rand(nx, y_data, y_size);
-    b_st.site = &g_emlrtRSI;
-    c_st.site = &h_emlrtRSI;
-    loop_ub = y_size[0];
-    for (i = 0; i < loop_ub; i++) {
-      y_data[i] = 2.0 * y_data[i] - 1.0;
-    }
-
-    d_st.site = &i_emlrtRSI;
-    applyScalarFunction(&d_st, y_data, y_size, I_data, I_size);
+    randn(nx, I_data, I_size);
     loop_ub = I_size[0];
     for (i = 0; i < loop_ub; i++) {
-      I_data[i] = 6.0000000000000009 * (1.4142135623730951 * I_data[i]);
+      I_data[i] *= 6.0000000000000009;
     }
 
     if (nx != I_size[0]) {
@@ -500,20 +464,19 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
       s_data[i] = theta_old_data[i] - theta_s_data[i];
     }
 
-    y_size[0] = nx;
     if (0 <= nx - 1) {
-      memcpy(&y_data[0], &s_data[0], nx * sizeof(real_T));
+      memcpy(&x_data[0], &s_data[0], nx * sizeof(real_T));
     }
 
     for (k = 0; k < nx; k++) {
-      y_data[k] = muDoubleScalarCos(y_data[k]);
+      x_data[k] = muDoubleScalarCos(x_data[k]);
     }
 
     for (i = 0; i < nx; i++) {
-      y_data[i] = 1.0 - y_data[i];
+      x_data[i] = 1.0 - x_data[i];
     }
 
-    b_st.site = &fb_emlrtRSI;
+    b_st.site = &g_emlrtRSI;
     if (wnet->size[0] != nx) {
       if (((wnet->size[0] == 1) && (wnet->size[1] == 1)) || (nx == 1)) {
         emlrtErrorWithMessageIdR2018a(&b_st, &d_emlrtRTEI,
@@ -525,8 +488,8 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
       }
     }
 
-    b_st.site = &eb_emlrtRSI;
-    mtimes(wnet, y_data, y_size, tmp_data, I_size);
+    b_st.site = &f_emlrtRSI;
+    mtimes(wnet, x_data, x_size, tmp_data, I_size);
     if (nx != I_size[0]) {
       emlrtSizeEqCheck1DR2012b(nx, I_size[0], &emlrtECI, sp);
     }
@@ -595,8 +558,8 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
       emlrtDynamicBoundsCheckR2012b(i, 1, x->size[1], &emlrtBCI, &st);
     }
 
-    b_st.site = &ib_emlrtRSI;
-    c_st.site = &jb_emlrtRSI;
+    b_st.site = &j_emlrtRSI;
+    c_st.site = &k_emlrtRSI;
     idx = 0;
     i = ii->size[0];
     ii->size[0] = 4000000;
@@ -714,7 +677,7 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
         b_idx->data[i] = (k + i) + 1;
       }
 
-      b_st.site = &mb_emlrtRSI;
+      b_st.site = &n_emlrtRSI;
       b_p = true;
       loop_ub = 0;
       exitg1 = false;
@@ -741,7 +704,7 @@ real_T theta_model_P(const emlrtStack *sp, const emxArray_real_T *net, real_T w,
         b_idx->data[i] = (k + i) + 1;
       }
 
-      b_st.site = &nb_emlrtRSI;
+      b_st.site = &o_emlrtRSI;
       delete_rows(&b_st, seizure_index, b_idx);
       time_seizure = 0.0;
       i = seizure_index->size[0];

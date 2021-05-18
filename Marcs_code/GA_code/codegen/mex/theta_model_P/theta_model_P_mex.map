@@ -1,0 +1,21 @@
+MEX {
+	global:
+		mexFunction;
+		mexfilerequiredapiversion;
+		emlrtMexFcnProperties;
+		theta_model_P_initialize;
+		theta_model_P_terminate;
+		theta_model_P_atexit;
+		theta_model_P;
+		emxEnsureCapacity_real_T;
+		emxEnsureCapacity_boolean_T;
+		emxEnsureCapacity_int32_T;
+		emxInit_real_T;
+		emxFree_real_T;
+		emxInit_boolean_T;
+		emxFree_boolean_T;
+		emxInit_int32_T;
+		emxFree_int32_T;
+	local:
+		*;
+};

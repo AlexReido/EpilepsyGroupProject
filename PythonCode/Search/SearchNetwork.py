@@ -74,7 +74,7 @@ class SearchNetwork:
         elif self.searchAlgo == "NSGA2":
             print("NSGA-II")
             search = NSGA2(
-                pop_size=10,
+                pop_size=200,
                 sampling=BinaryRandomSamplingLimit(max_nodes),
                 crossover=UniformCrossoverLimit(max_nodes),
                 mutation=BinaryBitflipMutationLimit(max_nodes),
@@ -87,14 +87,13 @@ class SearchNetwork:
                        search,
                        termination,
                        callback=callback,
-                       seed=1,
                        save_history=True,
                        verbose=True)
 
 
         # print("Number of Nodes, (1-Delta BNI value)")
         # print(res.F)  # final fitness
-        swp.returnResults(res)
+        #swp.returnResults(res)
         return res
         #print("Number of Nodes, (1-Delta BNI value)")
         #print(res.F)  # final fitness

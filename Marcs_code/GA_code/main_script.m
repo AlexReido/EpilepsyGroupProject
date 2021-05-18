@@ -24,11 +24,11 @@ clear
 num_gen = 100; %number of generations
 pop_size = 200; %population size in each generation
 
-num_GA_runs = 8; %number of GA runs
+num_GA_runs = 1; %number of GA runs
 
 %% load the network
 
-load('net')
+load('net_sf_dir_1')
 
 %first check if the network has ones in its main diagonal (if yes we delete them)
 length_net = length(net);

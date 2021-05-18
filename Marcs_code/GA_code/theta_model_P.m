@@ -14,6 +14,7 @@ function BNI=theta_model_P(net,w,nodes_resected)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %rng('shuffle');it is not supported for the convertion to the mex files
 
+
 % Fixed parameters:
 T = 4000000;         % time steps
 I_0 = -1.2;         % distance to SNIC
@@ -44,7 +45,7 @@ theta_old = theta_s; % initial condition
 
 % Compute time series
 for time = 1:T-1
-    I = I_0+I_sig*randn2(N,1)+wnet*(1-cos(theta_old-theta_s));
+    I = I_0+I_sig*randn(N,1)+wnet*(1-cos(theta_old-theta_s));
     theta_new = theta_old+dt*(1-cos(theta_old)+(1+cos(theta_old)).*I);
     s = 0.5*(1-cos(theta_old-theta_s));
     signal(1,:) = s;

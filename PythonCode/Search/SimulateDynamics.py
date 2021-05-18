@@ -16,7 +16,6 @@ def theta_model_p(net, w, nodes_resected, t=4000000):
     :param w: global coupling (scalar)
     :param nodes_resected: the number of nodes that are resected
     :param t: time steps
-    :param seed: seed to control random number distribution
     :returns bni: bni of the network.
     """
     nodes = len(net)  # number of nodes
@@ -143,7 +142,6 @@ def bni_find(net, t=4000000):
     :returns w_safe: The coupling values that correspond to the BNI_test_values.
     """
 
-    nodes = len(net)  # number of nodes
     w = 25  # initial guess of coupling
 
     # main calculations
@@ -218,7 +216,7 @@ def bni_find(net, t=4000000):
     return w_ref, bni, w_save
 
 
-@nb.jit(parallel=True, nopython=True, nogil=True, cache=True, fastmath=True)
+@nb.jit(parallel=False, nopython=True, nogil=True, cache=True, fastmath=True)
 def delta_bni_r_dir(num_resect_nodes, individ, w, net, t=4000000):
     """
     DeltaBNI calculation for the given network.

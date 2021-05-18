@@ -1,0 +1,16 @@
+name: EpilepsyGroupProject
+channels:
+  - intel
+  - defaults
+dependencies:
+  - python=3.8.5
+  - numpy~=1.20.1
+  - mkl-service
+  - numba~=0.51.2
+  - cython
+  - scipy~=1.6.0
+  - icc_rt
+  - cudatoolkit
+  - requests~=2.24.0
+  - pandas~=1.2.3
+prefix: C:\ProgramData\Anaconda3\envs\EpilepsyGroupProject
