@@ -40,7 +40,7 @@ def getJsonfromAdj(adj_mat, link_threshold=0.008):
         nodes.append({
             "id": row
         })
-    # TODO parametert
+    # TODO parameter
     for i, row in enumerate(adj_mat):
         for j, link in enumerate(row):
             if link > link_threshold:
